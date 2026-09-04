@@ -19,6 +19,8 @@ void Main()
     app.add<PlayScene>(SceneState::Play);
     app.add<ResultScene>(SceneState::Result);
 
+    app.init(SceneState::Title, 0.0s);
+
     while (System::Update())
     {
         if (not app.update())
