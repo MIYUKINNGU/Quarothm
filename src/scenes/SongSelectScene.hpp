@@ -11,5 +11,6 @@ public:
 
 private:
     const Font m_headingFont{ FontMethod::MSDF, 40, Typeface::Bold };
-    const Font m_bodyFont{ 24 };
+    const Font m_bodyFont{ FontMethod::MSDF, 48 };;
+    int m_sceneHeight = Scene::Height();
 };

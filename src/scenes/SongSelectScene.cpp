@@ -23,8 +23,11 @@ void SongSelectScene::update()
 
 void SongSelectScene::draw() const
 {
-    m_headingFont(U"SONG SELECT").drawAt(400, 100, Palette::Aqua);
-    RoundRect{ 180, 180, 440, 100, 12 }.draw(ColorF{ 0.12, 0.22, 0.35 });
-    m_bodyFont(getData().selectedSong).drawAt(400, 230);
-    m_bodyFont(U"Enter: Start    Esc: Back").drawAt(400, 400, Palette::White);
+    const Vec2 center = Scene::CenterF();
+
+    const double scale = Scene::Height() / 600.0;
+
+    m_bodyFont(U"楽曲選曲").draw(24.0 * scale, Vec2{ 26, 15 }, Palette::White);
+    RoundRect{ center.x - 110 * scale, center.y - 165 * scale, 220 * scale, 330 * scale, 5 }.draw(ColorF{ 0.12, 0.22, 0.35 });
+    m_bodyFont(getData().selectedSong).draw(24.0 * scale, Arg::center(Vec2{ center.x, center.y + 130 * scale }), Palette::White);
 }

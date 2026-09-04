@@ -11,6 +11,7 @@ void Main()
     System::SetTerminationTriggers(UserAction::CloseButtonClicked);
     Window::SetTitle(U"CHUNITHM-like Rhythm Game");
     // Window::SetFullscreen(true);
+    Window::SetStyle(WindowStyle::Sizable);
     Scene::SetBackground(ColorF{ 0.04, 0.05, 0.09 });
 
     // 画面の登録、更新、フェード中の描画までSiv3D標準のSceneManagerに任せます。
