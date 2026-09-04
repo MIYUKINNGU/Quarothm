@@ -1,5 +1,6 @@
 #pragma once
 #include "../Common.hpp"
+#include "../utillities/ResponsiveValue.hpp"
 
 class SongSelectScene final : public App::Scene
 {
