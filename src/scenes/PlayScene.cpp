@@ -47,8 +47,8 @@ void PlayScene::update()
 
         if (KeyR.down() || m_elapsedSec >= 10.0)
         {
-            getData().score = 987654;
-            getData().maxCombo = 123;
+            getData().presentPlayData.score = 987654;
+            getData().presentPlayData.maxCombo = 123;
             m_state = State::Finished;
         }
         break;

@@ -14,7 +14,7 @@ void ResultScene::update()
 void ResultScene::draw() const
 {
     m_headingFont(U"RESULT").drawAt(400, 110, Palette::Yellow);
-    m_bodyFont(U"SCORE: " + Format(getData().score)).drawAt(400, 220);
-    m_bodyFont(U"MAX COMBO: " + Format(getData().maxCombo)).drawAt(400, 270);
+    m_bodyFont(U"SCORE: " + Format(getData().presentPlayData.score)).drawAt(400, 220);
+    m_bodyFont(U"MAX COMBO: " + Format(getData().presentPlayData.maxCombo)).drawAt(400, 270);
     m_bodyFont(U"Enter: Song Select    Esc: Title").drawAt(400, 420);
 }
