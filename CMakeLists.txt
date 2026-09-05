@@ -13,6 +13,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 add_executable(Siv3DTest
   Main.cpp
+  src/scenes/InitializeScene.cpp
   src/scenes/TitleScene.cpp
   src/scenes/SongSelectScene.cpp
   src/scenes/PlayScene.cpp
@@ -28,6 +29,12 @@ target_link_directories(Siv3DTest PRIVATE
 )
 
 target_compile_features(Siv3DTest PRIVATE cxx_std_20)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(Siv3DTest PRIVATE __DEBUG__=1)
+else()
+    target_compile_definitions(Siv3DTest PRIVATE __DEBUG__=0)
+endif()
 
 if(BUILD_TESTING)
 enable_testing()

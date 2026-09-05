@@ -2,7 +2,51 @@
 
 void SongSelectScene::initialize()
 {
-    // 選曲リストや選択カーソルの初期化はここへ追加します。
+    const JSON song_list_json = JSON::Load(U"assets/songs/song_list.json");
+
+	if (not song_list_json)
+	{
+		ThrowError(U"Failed to load.", U"Failed to load `assets/songs/song_list.json`");
+	}
+
+    for (const auto& [index, object] : song_list_json)
+    {
+        const unsigned long long song_id = object[U"id"].get<unsigned long long>();
+        const SongData song_data{
+            object[U"id"].get<unsigned long long>(),
+            object[U"title"].getString(),
+            object[U"artist"].getString(),
+            object[U"path"].getString(),
+        };
+        m_songRegistry[song_id] = song_data;
+    }
+
+    const JSON songsFolder_list_json = JSON::Load(U"assets/songs/songsFolder_list.json");
+
+	if (not songsFolder_list_json)
+	{
+		ThrowError(U"Failed to load.", U"Failed to load `assets/songs/songsFolder_list.json`");
+	}
+
+    for (const auto& [index, object] : songsFolder_list_json)
+    {
+        const SongsFolderSpecies folder_species = static_cast<SongsFolderSpecies>(object[U"id"].get<int>());
+        for (const auto& song_id : object[U"song_ids"].get<std::vector<unsigned long long>>())
+        {
+            if (m_songRegistry.find(song_id) != m_songRegistry.end() &&
+                m_songFolderRegistry.find(folder_species) != m_songFolderRegistry.end())
+            {
+                m_songFolderRegistry[folder_species].push_back(m_songRegistry[song_id]);
+            }
+            else if (m_songRegistry.find(song_id) != m_songRegistry.end())
+            {
+                m_songFolderRegistry[folder_species] = { m_songRegistry[song_id] };
+            }
+            else {
+                DebugWarning("Song (id: " + std::to_string(song_id) + ") not found in registry.");
+            }
+        }
+    }
 }
 
 void SongSelectScene::update()
@@ -15,8 +59,8 @@ void SongSelectScene::update()
     if (KeyEnter.down())
     {
         auto& data = getData();
-        data.score = 0;
-        data.maxCombo = 0;
+        data.presentPlayData.score = 0;
+        data.presentPlayData.maxCombo = 0;
         changeScene(SceneState::Play, 0.0s);
     }
 }

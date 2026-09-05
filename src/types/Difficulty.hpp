@@ -1,0 +1,7 @@
+#pragma once
+
+enum class Difficulty {
+    Easy,
+    Normal,
+    Expert
+};

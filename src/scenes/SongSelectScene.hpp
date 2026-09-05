@@ -12,6 +12,9 @@ public:
 
 private:
     const Font m_headingFont{ FontMethod::MSDF, 40, Typeface::Bold };
-    const Font m_bodyFont{ FontMethod::MSDF, 48 };;
+    const Font m_bodyFont{ FontMethod::MSDF, 48 };
     int m_sceneHeight = Scene::Height();
+    std::vector<SongData> m_songList{};
+    std::unordered_map<unsigned long long, SongData> m_songRegistry;
+    std::unordered_map<SongsFolderSpecies, std::vector<SongData>> m_songFolderRegistry;
 };
