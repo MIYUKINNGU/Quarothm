@@ -19,13 +19,14 @@ struct GameData
     std::unordered_map<unsigned long long, ScoreRecorder> scoreRecords{};
     SongSelection selectedSong = SongSelection{ SongData::nullSongData, SongsFolderSpecies::Singles, Difficulty::Easy };
     ScoreRecorder presentPlayData = ScoreRecorder{};
+    JSON cache = JSON();
 };
 
 using App = SceneManager<SceneState, GameData>;
 
-inline void DebugLog(const std::string& message) {
+inline void DebugLog(const String& message) {
 #ifdef __DEBUG__
-    std::cout << message << std::endl;
+    Console << message;
 #endif
 };
 
@@ -37,8 +38,8 @@ inline void ThrowError(const String& message, const String& details = U"") {
 #endif
 }
 
-inline void DebugWarning(const std::string& message) {
+inline void DebugWarning(const String& message) {
 #ifdef __DEBUG__
-    std::cerr << "Warning: " << message << std::endl;
+    Console << U"Warning: " << message;
 #endif
 }

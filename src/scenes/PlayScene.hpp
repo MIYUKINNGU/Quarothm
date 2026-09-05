@@ -1,14 +1,15 @@
 #pragma once
 #include "../Common.hpp"
 #include "../ecs/EcsWorld.hpp"
+#include "../types/AbstractScene.hpp"
 
-class PlayScene final : public App::Scene
+class PlayScene final : public AbstractScene<PlayScene>
 {
 public:
-    PlayScene(const InitData& init);
+    using AbstractScene<PlayScene>::AbstractScene;
     void initialize();
-    void update() override;
-    void draw() const override;
+    void updateImpl();
+    void drawImpl() const;
 
 private:
     enum class State

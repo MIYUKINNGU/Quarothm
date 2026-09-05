@@ -1,13 +1,14 @@
 #pragma once
 #include "../Common.hpp"
+#include "../types/AbstractScene.hpp"
 
-class TitleScene final : public App::Scene
+class TitleScene final : public AbstractScene<TitleScene>
 {
 public:
-    TitleScene(const InitData& init) : IScene{ init } { initialize(); }
+    using AbstractScene<TitleScene>::AbstractScene;
     void initialize();
-    void update() override;
-    void draw() const override;
+    void updateImpl();
+    void drawImpl() const;
 
 private:
     const Font m_titleFont{ FontMethod::MSDF, 56, Typeface::Bold };

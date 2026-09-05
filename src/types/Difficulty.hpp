@@ -1,7 +1,7 @@
 #pragma once
 
 enum class Difficulty {
-    Easy,
-    Normal,
-    Expert
+    Easy = 1,
+    Normal = 2,
+    Expert = 3
 };

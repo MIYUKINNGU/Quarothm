@@ -5,7 +5,7 @@ void TitleScene::initialize()
     // タイトル画面へ遷移した直後の初期化をここへ追加します。
 }
 
-void TitleScene::update()
+void TitleScene::updateImpl()
 {
     if (KeyEnter.down())
     {
@@ -18,7 +18,7 @@ void TitleScene::update()
     }
 }
 
-void TitleScene::draw() const
+void TitleScene::drawImpl() const
 {
     m_titleFont(U"RHYTHM GAME").drawAt(Scene::Center().movedBy(0, -45), Palette::Aqua);
     m_guideFont(U"Press Enter").drawAt(Scene::Center().movedBy(0, 45), Palette::White);

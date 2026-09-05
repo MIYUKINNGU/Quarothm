@@ -1,14 +1,16 @@
 #pragma once
 #include "../Common.hpp"
 #include "../utillities/ResponsiveValue.hpp"
+#include <algorithm>
+#include "../types/AbstractScene.hpp"
 
-class SongSelectScene final : public App::Scene
+class SongSelectScene final : public AbstractScene<SongSelectScene>
 {
 public:
-    SongSelectScene(const InitData& init) : IScene{ init } { initialize(); }
+    using AbstractScene<SongSelectScene>::AbstractScene;
     void initialize();
-    void update() override;
-    void draw() const override;
+    void updateImpl();
+    void drawImpl() const;
 
 private:
     const Font m_headingFont{ FontMethod::MSDF, 40, Typeface::Bold };

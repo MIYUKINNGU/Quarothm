@@ -25,3 +25,4 @@
 # Local generated game data (keep source assets under assets/ tracked)
 /assets/cache/
 /assets/generated/
+/saves/cache_data.json

@@ -2,12 +2,6 @@
 
 #include "../ecs/RhythmComponents.hpp"
 
-PlayScene::PlayScene(const InitData& init)
-    : IScene{ init }
-{
-    initialize();
-}
-
 void PlayScene::initialize()
 {
     m_state = State::Loading;
@@ -25,7 +19,7 @@ void PlayScene::beginPlaying()
     m_state = State::Playing;
 }
 
-void PlayScene::update()
+void PlayScene::updateImpl()
 {
     switch (m_state)
     {
@@ -59,7 +53,7 @@ void PlayScene::update()
     }
 }
 
-void PlayScene::draw() const
+void PlayScene::drawImpl() const
 {
     if (m_state == State::Loading)
     {

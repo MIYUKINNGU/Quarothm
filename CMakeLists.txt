@@ -19,6 +19,7 @@ add_executable(Siv3DTest
   src/scenes/PlayScene.cpp
   src/scenes/ResultScene.cpp
   src/utillities/ResponsiveValue.cpp
+  src/types/AbstractScene.cpp
   )
 
 find_package(Siv3D)

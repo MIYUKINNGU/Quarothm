@@ -2,18 +2,18 @@
 
 void SongSelectScene::initialize()
 {
-    const JSON song_list_json = JSON::Load(U"assets/songs/song_list.json");
+    const JSON song_list_json = JSON::Load(U"assets/songs/songs_list.json");
 
 	if (not song_list_json)
 	{
-		ThrowError(U"Failed to load.", U"Failed to load `assets/songs/song_list.json`");
+		ThrowError(U"Failed to load.", U"Failed to load `assets/songs/songs_list.json`");
 	}
 
     for (const auto& [index, object] : song_list_json)
     {
-        const unsigned long long song_id = object[U"id"].get<unsigned long long>();
+        const unsigned long long song_id = static_cast<unsigned long long>(object[U"id"].get<int32>());
         const SongData song_data{
-            object[U"id"].get<unsigned long long>(),
+            song_id,
             object[U"title"].getString(),
             object[U"artist"].getString(),
             object[U"path"].getString(),
@@ -21,18 +21,20 @@ void SongSelectScene::initialize()
         m_songRegistry[song_id] = song_data;
     }
 
-    const JSON songsFolder_list_json = JSON::Load(U"assets/songs/songsFolder_list.json");
+    const JSON songsFolder_list_json = JSON::Load(U"assets/songs/songsfolder_list.json");
 
 	if (not songsFolder_list_json)
 	{
-		ThrowError(U"Failed to load.", U"Failed to load `assets/songs/songsFolder_list.json`");
+		ThrowError(U"Failed to load.", U"Failed to load `assets/songs/songsfolder_list.json`");
 	}
 
     for (const auto& [index, object] : songsFolder_list_json)
     {
-        const SongsFolderSpecies folder_species = static_cast<SongsFolderSpecies>(object[U"id"].get<int>());
-        for (const auto& song_id : object[U"song_ids"].get<std::vector<unsigned long long>>())
+        const SongsFolderSpecies folder_species = static_cast<SongsFolderSpecies>(object[U"id"].get<int32>());
+        for (const auto& [index, song_id_raw] : object[U"song_ids"])
         {
+            const unsigned long long song_id = static_cast<unsigned long long>(song_id_raw.get<int32>());
+
             if (m_songRegistry.find(song_id) != m_songRegistry.end() &&
                 m_songFolderRegistry.find(folder_species) != m_songFolderRegistry.end())
             {
@@ -43,13 +45,17 @@ void SongSelectScene::initialize()
                 m_songFolderRegistry[folder_species] = { m_songRegistry[song_id] };
             }
             else {
-                DebugWarning("Song (id: " + std::to_string(song_id) + ") not found in registry.");
+                DebugWarning(U"Song (id: " + Format(song_id) + U") not found in registry.");
             }
         }
     }
+
+    auto& data = getData();
+
+    data.selectedSong = SongSelection{ m_songRegistry[static_cast<unsigned long long>(data.cache[U"last_selected_song_id"].get<int32>())], static_cast<SongsFolderSpecies>(data.cache[U"last_selected_song_folder_id"].get<int32>()), static_cast<Difficulty>(data.cache[U"last_selected_difficulty"].get<int32>()) };
 }
 
-void SongSelectScene::update()
+void SongSelectScene::updateImpl()
 {
     if (KeyEscape.down())
     {
@@ -65,11 +71,11 @@ void SongSelectScene::update()
     }
 }
 
-void SongSelectScene::draw() const
+void SongSelectScene::drawImpl() const
 {
     const Vec2 center = Scene::CenterF();
 
     m_bodyFont(U"楽曲選曲").draw(24.0_sc, Vec2{ 26, 15 }, Palette::White);
     RoundRect{ center.x - 110_sc, center.y - 165_sc, 220_sc, 330_sc, 5 }.draw(ColorF{ 0.12, 0.22, 0.35 });
-    m_bodyFont(getData().selectedSong).draw(24.0_sc, Arg::center(Vec2{ center.x, center.y + 130_sc }), Palette::White);
+    m_bodyFont(getData().selectedSong.selectedSongData.title).draw(24.0_sc, Arg::center(Vec2{ center.x, center.y + 130_sc }), Palette::White);
 }

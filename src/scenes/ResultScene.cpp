@@ -5,13 +5,13 @@ void ResultScene::initialize()
     // リザルト表示用の集計・演出の初期化をここへ追加します。
 }
 
-void ResultScene::update()
+void ResultScene::updateImpl()
 {
     if (KeyEnter.down()) changeScene(SceneState::SongSelect, 0.0s);
     else if (KeyEscape.down()) changeScene(SceneState::Title, 0.0s);
 }
 
-void ResultScene::draw() const
+void ResultScene::drawImpl() const
 {
     m_headingFont(U"RESULT").drawAt(400, 110, Palette::Yellow);
     m_bodyFont(U"SCORE: " + Format(getData().presentPlayData.score)).drawAt(400, 220);

@@ -9,6 +9,13 @@
 
 void Main()
 {
+#ifndef __DEBUG__
+    Console << U"Release build";
+    Logger.disable();
+#else
+    Console << U"Debug build";
+#endif
+
     System::SetTerminationTriggers(UserAction::CloseButtonClicked);
     Window::SetTitle(U"CHUNILIKE");
     // Window::SetFullscreen(true);

@@ -1,13 +1,14 @@
 #pragma once
 #include "../Common.hpp"
+#include "../types/AbstractScene.hpp"
 
-class ResultScene final : public App::Scene
+class ResultScene final : public AbstractScene<ResultScene>
 {
 public:
-    ResultScene(const InitData& init) : IScene{ init } { initialize(); }
+    using AbstractScene<ResultScene>::AbstractScene;
     void initialize();
-    void update() override;
-    void draw() const override;
+    void updateImpl();
+    void drawImpl() const;
 
 private:
     const Font m_headingFont{ FontMethod::MSDF, 42, Typeface::Bold };
