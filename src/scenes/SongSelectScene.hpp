@@ -3,6 +3,7 @@
 #include "../utillities/ResponsiveValue.hpp"
 #include <algorithm>
 #include "../types/AbstractScene.hpp"
+#include <cmath>
 
 class SongSelectScene final : public AbstractScene<SongSelectScene>
 {
@@ -19,4 +20,7 @@ private:
     std::vector<SongData> m_songList{};
     std::unordered_map<unsigned long long, SongData> m_songRegistry;
     std::unordered_map<SongsFolderSpecies, std::vector<SongData>> m_songFolderRegistry;
+    double m_renderIndex;
+    unsigned long long m_frameCount = 0;
+    unsigned long long m_beforeFrameCount = 0;
 };

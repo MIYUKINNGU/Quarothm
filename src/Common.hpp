@@ -17,7 +17,7 @@ enum class SceneState
 struct GameData
 {
     std::unordered_map<unsigned long long, ScoreRecorder> scoreRecords{};
-    SongSelection selectedSong = SongSelection{ SongData::nullSongData, SongsFolderSpecies::Singles, Difficulty::Easy };
+    SongSelection selectedSong = SongSelection{ SongData::nullSongData, SongsFolderSpecies::Singles, 0, Difficulty::Easy };
     ScoreRecorder presentPlayData = ScoreRecorder{};
     JSON cache = JSON();
 };

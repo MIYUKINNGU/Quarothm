@@ -4,5 +4,29 @@
         "title": "Sample Song",
         "artist": "Various Artists",
         "path": "assets/songs/sample_song"
+    },
+    {
+        "id": 2,
+        "title": "Sample2 Song",
+        "artist": "Various Artists",
+        "path": "assets/songs/sample_song"
+    },
+    {
+        "id": 3,
+        "title": "Sample3 Song",
+        "artist": "Various Artists",
+        "path": "assets/songs/sample_song"
+    },
+    {
+        "id": 4,
+        "title": "Sample4 Song",
+        "artist": "Various Artists",
+        "path": "assets/songs/sample_song"
+    },
+    {
+        "id": 5,
+        "title": "Sample5 Song",
+        "artist": "Various Artists",
+        "path": "assets/songs/sample_song"
     }
 ]
