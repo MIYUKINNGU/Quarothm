@@ -14,7 +14,7 @@ void PlayScene::beginPlaying()
     m_world.clear();
     // ここで譜面・音源などの同期ロード後に必要な初期化を行います。
     const Entity note = m_world.createEntity();
-    m_world.addComponent<NoteComponent>(note, NoteComponent{ 2.0, 2, false });
+    m_world.addComponent<NoteComponent>(note, NoteComponent{ 2.0, 2, 3, false });
     m_world.addComponent<TransformComponent>(note, TransformComponent{ Vec2{ 400, 100 } });
     m_state = State::Playing;
 }
@@ -61,8 +61,16 @@ void PlayScene::drawImpl() const
         return;
     }
 
-    Rect{ 200, 80, 400, 500 }.drawFrame(3, Palette::Aqua);
-    Line{ 200, 500, 600, 500 }.draw(4, Palette::Yellow);
+    Point center = Scene::Center();
+
+    Rect{ center.x - 350_scw, -10_sch, 700_scw, Scene::Height() + 20_sch }.drawFrame(3_scw, Palette::White);
+    for (int i = 1; i < 12; i++) {
+        Line{
+            center.x - 350_scw + 58.3333333333_scw * i, -10_sch,
+            center.x - 350_scw + 58.3333333333_scw * i, Scene::Height() + 10_sch
+        }.draw(1_scw * (2 != i && i != 10 ? ((i - 3 ^ i - 2) + 1) / 2 : 2), Palette::Gray);
+    }
+    Line{ center.x - 350_scw, Scene::Height() - 100_sch, center.x + 350_scw, Scene::Height() - 100_sch }.draw(4_scw, Palette::Yellow);
     m_world.each<TransformComponent>([](const Entity, const TransformComponent& transform)
     {
         Circle{ transform.position, 18 }.draw(Palette::Hotpink);

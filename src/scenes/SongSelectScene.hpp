@@ -1,6 +1,6 @@
 #pragma once
 #include "../Common.hpp"
-#include "../utillities/ResponsiveValue.hpp"
+#include "../utilities/ResponsiveValue.hpp"
 #include <algorithm>
 #include "../types/AbstractScene.hpp"
 #include <cmath>

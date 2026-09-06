@@ -26,3 +26,11 @@
 /assets/cache/
 /assets/generated/
 /saves/cache_data.json
+
+# Decide how to handle an audio files, a jacket files, and etc later.
+/assets/songs/*/*.wav
+/assets/songs/*/*.ogg
+/assets/songs/*/*.mp3
+/assets/songs/*/*.png
+/assets/songs/*/*.jpg
+/assets/songs/*/*.jpeg

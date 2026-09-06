@@ -3,6 +3,7 @@
 #include <Siv3D.hpp>
 #include "types/SongSelection.hpp"
 #include "types/ScoreRecorder.hpp"
+#include "types/SettingsStorage.hpp"
 
 // Siv3D の SceneManager が画面の識別と共有データを管理します。
 enum class SceneState
@@ -20,6 +21,7 @@ struct GameData
     SongSelection selectedSong = SongSelection{ SongData::nullSongData, SongsFolderSpecies::Singles, 0, Difficulty::Easy };
     ScoreRecorder presentPlayData = ScoreRecorder{};
     JSON cache = JSON();
+    SettingsStorage settings = SettingsStorage{};
 };
 
 using App = SceneManager<SceneState, GameData>;
@@ -28,7 +30,7 @@ inline void DebugLog(const String& message) {
 #ifdef __DEBUG__
     Console << message;
 #endif
-};
+}
 
 inline void ThrowError(const String& message, const String& details = U"") {
 #ifdef __DEBUG__

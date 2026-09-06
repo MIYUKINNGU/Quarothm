@@ -18,7 +18,7 @@ add_executable(Siv3DTest
   src/scenes/SongSelectScene.cpp
   src/scenes/PlayScene.cpp
   src/scenes/ResultScene.cpp
-  src/utillities/ResponsiveValue.cpp
+  src/utilities/ResponsiveValue.cpp
   src/types/AbstractScene.cpp
   )
 

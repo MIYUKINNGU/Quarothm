@@ -98,7 +98,7 @@ void SongSelectScene::updateImpl()
     }
 
     if (m_beforeFrameCount != Scene::FrameCount()) {
-        m_renderIndex += (m_renderIndex - data.selectedSong.selectedSongIndex) * (std::pow(0.5, ResponsiveValue(0, Scene::FrameCount()-m_frameCount)) - 1);
+        m_renderIndex += (m_renderIndex - data.selectedSong.selectedSongIndex) * (std::pow(0.5, ResponsiveValue(0, static_cast<double>(Scene::FrameCount()-m_frameCount))) - 1);
         m_beforeFrameCount = Scene::FrameCount();
     }
 }
@@ -108,9 +108,9 @@ void SongSelectScene::drawImpl() const
     const Vec2 center = Scene::CenterF();
     const auto& data = getData();
 
-    m_bodyFont(U"楽曲選曲").draw(24.0_sc, Vec2{ 26, 15 }, Palette::White);
+    m_bodyFont(U"楽曲選曲").draw(24.0_sch, Vec2{ 26, 15 }, Palette::White);
 
-    double scroll_offset = 73.33333_sc;
+    double scroll_offset = 73.33333_sch;
     const SongsFolderSpecies selected_folder_species = data.selectedSong.selectedFolderSpecies;
     const SongData selected_song = data.selectedSong.selectedSongData;
     const auto& songs_in_folder = m_songFolderRegistry.at(selected_folder_species);
@@ -149,7 +149,7 @@ void SongSelectScene::drawImpl() const
             5
         }.draw(ColorF{ 0.12, 0.22, 0.35 });
         m_bodyFont(song_data.title).draw(
-            24.0_sc * baseMultipler,
+            24.0_sch * baseMultipler,
             Arg::center(Vec2{
                 center.x + ResponsiveValue(text_x),
                 center.y + ResponsiveValue(-0.311111111 * basePos.y + 78.6666)
