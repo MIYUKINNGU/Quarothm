@@ -508,9 +508,130 @@ void PlayScene::beginPlaying()
         m_world.addComponent<TransformComponent>(note, TransformComponent{ Vec2{ center.x, center.y + 40_sch + distance } }); // こういうところ変える
     }
 
+    // おお。だいぶ頭柔らかくなって調子取り戻してきてんじゃねえの
+    std::pair<double, int32> m_value(100000000000000.0, 0);
+    if (0 < m_chartData.laneLeft.size()) {
+        std::pair<double, int32> ht = std::pair(m_chartData.laneLeft[0]->hitTimeMilliSec, 0);
+        m_value = std::min(m_value, ht, [](const auto a, const auto b) {return a.first < b.first;});
+    }
+    if (0 < m_chartData.laneRight.size()) {
+        std::pair<double, int32> ht = std::pair(m_chartData.laneRight[0]->hitTimeMilliSec, 1);
+        m_value = std::min(m_value, ht, [](const auto a, const auto b) {return a.first < b.first;});
+    }
+    if (0 < m_chartData.laneUp.size()) {
+        std::pair<double, int32> ht = std::pair(m_chartData.laneUp[0]->hitTimeMilliSec, 2);
+        m_value = std::min(m_value, ht, [](const auto a, const auto b) {return a.first < b.first;});
+    }
+    if (0 < m_chartData.laneDown.size()) {
+        std::pair<double, int32> ht = std::pair(m_chartData.laneDown[0]->hitTimeMilliSec, 3);
+        m_value = std::min(m_value, ht, [](const auto a, const auto b) {return a.first < b.first;});
+    }
+    m_currentLane = m_value.second;
+    m_renderRot = rot_map.at(m_currentLane);
+
+    data.presentPlayData = ScoreRecorder{};
+
     m_state = State::Playing;
 
     m_song_audio.play();
+}
+
+size_t& PlayScene::getCurrentLaneReadingIdx() {
+    switch (m_currentLane) {
+    case 0:
+        return reading_idx_left;
+    case 1:
+        return reading_idx_right;
+    case 2:
+        return reading_idx_up;
+    case 3:
+        return reading_idx_down;
+    }
+
+    ThrowError(U"Passed an undefined lane ID.", U"At PlayScene::getCurrentLaneReadingIdx().");
+}
+
+std::vector<NoteComponent*>& PlayScene::getCurrentLane() {
+    switch (m_currentLane) {
+    case 0:
+        return m_chartData.laneLeft;
+    case 1:
+        return m_chartData.laneRight;
+    case 2:
+        return m_chartData.laneUp;
+    case 3:
+        return m_chartData.laneDown;
+    }
+
+    ThrowError(U"Passed an undefined lane ID.", U"At PlayScene::getCurrentLane().");
+}
+
+JudgementType PlayScene::judgeNote(
+    NoteComponent* note_component,
+    double perfect_plus_threshold,
+    double perfect_threshold,
+    double good_threshold,
+    double miss_threshold
+) {
+    double diff = std::abs(note_component->hitTimeMilliSec + m_chartData.chartOffset - m_elapsedMilliSec);
+    if (diff < perfect_plus_threshold) return JudgementType::PerfectPlus;
+    if (diff < perfect_threshold) return JudgementType::Perfect;
+    if (diff < good_threshold) return JudgementType::Good;
+    if (diff < miss_threshold) return JudgementType::Miss;
+    if (m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > miss_threshold) return JudgementType::Miss;
+    return JudgementType::None;
+}
+
+bool PlayScene::isNoteLate(NoteComponent* note_component) {
+    return note_component->hitTimeMilliSec - m_elapsedMilliSec < 0;
+}
+
+void PlayScene::processNoteMiss(NoteComponent* note_component, size_t& index) {
+    m_recentJudgement = JudgementType::Miss;
+    processNormalJudged(note_component, index);
+    getData().presentPlayData.maxCombo = std::max(getData().presentPlayData.maxCombo, combo);
+    combo = 0;
+}
+
+void PlayScene::processNormalJudged(NoteComponent* note_component, size_t& index) {
+    note_component->judged = true;
+    m_showJudgeTime = Scene::Time();
+    index++;
+    m_renderJudgeSize = 0;
+    m_judgeFrameCount = Scene::FrameCount();
+    increaseJudgeCount();
+}
+
+void PlayScene::processJudging(NoteComponent* note_component, size_t& index) {
+    m_recentJudgement = judgeNote(note_component);
+    if (m_recentJudgement != JudgementType::None) {
+        processNormalJudged(note_component, index);
+    }
+
+    if (m_recentJudgement == JudgementType::Miss) {
+        combo = 0;
+    }
+    else if (m_recentJudgement != JudgementType::None) {
+        combo++;
+    }
+}
+
+void PlayScene::increaseJudgeCount() {
+    auto& data = getData();
+    switch (m_recentJudgement) {
+    case JudgementType::Miss:
+        data.presentPlayData.miss++;
+        break;
+    case JudgementType::Good:
+        data.presentPlayData.good++;
+        break;
+    case JudgementType::PerfectPlus:
+        data.presentPlayData.perfectplus++;
+        break;
+    case JudgementType::Perfect:
+        data.presentPlayData.perfect++;
+        break;
+    }
 }
 
 void PlayScene::updateImpl()
@@ -523,7 +644,7 @@ void PlayScene::updateImpl()
         // 非同期で状態更新もしてるのですることがない
         break;
 
-    case State::Playing:
+    case State::Playing: {
         m_elapsedMilliSec = m_song_audio.posSec() * 1000;
         // NoteMoveSystem相当: Noteを持つEntityの位置を一括更新します。
         m_world.each<TransformComponent>([this, data](const Entity note, TransformComponent& transform)
@@ -531,7 +652,6 @@ void PlayScene::updateImpl()
             NoteComponent* note_component = *m_world.getComponent<NoteComponent*>(note);
 
             double distance = (note_component->hitTimeMilliSec + m_chartData.chartOffset + data.settings.offset - m_elapsedMilliSec) * data.settings.noteSpeed * 0.1_sch;
-            DebugLog(U"[" + Format(m_elapsedMilliSec) + U"] id [" + Format(note) + U"] hitTime(ms): " + Format(note_component->hitTimeMilliSec + m_chartData.chartOffset) + U", distance: " + Format(distance) + U", ETA(ms): " + Format(note_component->hitTimeMilliSec + m_chartData.chartOffset + data.settings.offset - m_elapsedMilliSec));
 
             Point center = Scene::Center();
 
@@ -539,10 +659,10 @@ void PlayScene::updateImpl()
             case 0:
                 transform.position = Vec2{ center.x - 40_sch - distance, center.y };
                 break;
-            case 1:
+            case 2:
                 transform.position = Vec2{ center.x, center.y - 40_sch - distance };
                 break;
-            case 2:
+            case 1:
                 transform.position = Vec2{ center.x + 40_sch + distance, center.y };
                 break;
             case 3:
@@ -551,27 +671,167 @@ void PlayScene::updateImpl()
             }
         });
 
+        size_t& current_idx = getCurrentLaneReadingIdx();
+        std::vector<NoteComponent*>& current_lane = getCurrentLane();
+        // DebugLog(U"m_currentLane: " + Format(m_currentLane));
+        // DebugLog(U"current_idx: " + Format(current_idx));
+        // DebugLog(U"reading_idx_left: " + Format(reading_idx_left));
+        // DebugLog(U"reading_idx_right: " + Format(reading_idx_right));
+        // DebugLog(U"reading_idx_up: " + Format(reading_idx_up));
+        // DebugLog(U"reading_idx_down: " + Format(reading_idx_down));
+        if (current_lane.size() > current_idx) {
+            NoteComponent* current_note = current_lane[current_idx];
+            if (KeyJ.down() || KeyK.down()) {
+                if (current_note->noteType == NoteType::NormalTap) {
+                    processJudging(current_note, current_idx);
+                }
+                if (current_note->noteType == NoteType::Hold) {
+                    starting_point_tapped = true;
+                }
+            }
+            if (KeyJ.down() && KeyK.pressed() || KeyJ.pressed() && KeyK.down()) {
+                if (current_note->noteType == NoteType::DoubleTap) {
+                    processJudging(current_note, current_idx);
+                }
+            }
+            if (KeyLeft.down() || KeyA.down()) {
+                if (current_note->noteType == NoteType::FlickLeft) {
+                    processJudging(current_note, current_idx);
+                }
+
+                m_currentLane = 0;
+            }
+            if (KeyRight.down() || KeyD.down()) {
+                if (current_note->noteType == NoteType::FlickRight) {
+                    processJudging(current_note, current_idx);
+                }
+
+                m_currentLane = 1;
+            }
+            if (KeyUp.down() || KeyW.down()) {
+                if (current_note->noteType == NoteType::FlickUp) {
+                    processJudging(current_note, current_idx);
+                }
+
+                m_currentLane = 2;
+            }
+            if (KeyDown.down() || KeyS.down()) {
+                if (current_note->noteType == NoteType::FlickDown) {
+                    processJudging(current_note, current_idx);
+                }
+
+                m_currentLane = 3;
+            }
+            if (KeyK.pressed() || KeyJ.pressed()) {
+                if (current_note->noteType == NoteType::Drag) {
+                    if (isNoteLate(current_note)) {
+                        processJudging(current_note, current_idx);
+                    }
+                }
+            }
+            if (current_note->noteType == NoteType::Hold) {
+                if (!(KeyK.pressed() || KeyJ.pressed())) {
+                    starting_point_tapped = false;
+                }
+            }
+        }
+
         if (KeyLeft.down() || KeyA.down()) {
             m_currentLane = 0;
+            m_frameCount = Scene::FrameCount();
         }
         if (KeyRight.down() || KeyD.down()) {
             m_currentLane = 1;
+            m_frameCount = Scene::FrameCount();
         }
         if (KeyUp.down() || KeyW.down()) {
             m_currentLane = 2;
+            m_frameCount = Scene::FrameCount();
         }
         if (KeyDown.down() || KeyS.down()) {
             m_currentLane = 3;
+            m_frameCount = Scene::FrameCount();
+        }
+
+        NoteComponent* note_component;
+        if (m_chartData.laneLeft.size() > reading_idx_left) {
+            note_component = m_chartData.laneLeft[reading_idx_left];
+            
+            if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
+                processNoteMiss(note_component, reading_idx_left);
+            }
+            else if (note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
+                m_recentJudgement = JudgementType::PerfectPlus;
+                processNormalJudged(note_component, reading_idx_left);
+            }
+        }
+
+        if (m_chartData.laneRight.size() > reading_idx_right) {
+            note_component = m_chartData.laneRight[reading_idx_right];
+            if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
+                processNoteMiss(note_component, reading_idx_right);
+            }
+            else if (note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
+                m_recentJudgement = JudgementType::PerfectPlus;
+                processNormalJudged(note_component, reading_idx_right);
+            }
+        }
+
+        if (m_chartData.laneUp.size() > reading_idx_up) {
+            note_component = m_chartData.laneUp[reading_idx_up];
+            if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
+                processNoteMiss(note_component, reading_idx_up);
+            }
+            else if (note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
+                m_recentJudgement = JudgementType::PerfectPlus;
+                processNormalJudged(note_component, reading_idx_up);
+            }
+        }
+
+        if (m_chartData.laneDown.size() > reading_idx_down) {
+            note_component = m_chartData.laneDown[reading_idx_down];
+            if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
+                processNoteMiss(note_component, reading_idx_down);
+            }
+            else if (note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
+                m_recentJudgement = JudgementType::PerfectPlus;
+                processNormalJudged(note_component, reading_idx_down);
+            }
         }
 
         if (KeyR.down() || !m_song_audio.isPlaying())
         {
-            getData().presentPlayData.score = 987654;
-            getData().presentPlayData.maxCombo = 123;
+            data.presentPlayData.score = 987654;
+            data.presentPlayData.maxCombo = std::max(data.presentPlayData.maxCombo, combo);
             m_state = State::Finished;
         }
-        break;
 
+        // 1フレームに一回処理するもの
+        if (m_beforeFrameCount != Scene::FrameCount()) {
+            double target = rot_map.at(m_currentLane);
+            if (static_cast<int32>((target-m_renderRot))
+             >= static_cast<int32>(std::numbers::pi)) {
+                target -= 2*std::numbers::pi;
+            }
+            if (static_cast<int32>(std::abs(m_renderRot-target))
+             >= static_cast<int32>(std::numbers::pi)) {
+                target += 2*std::numbers::pi;
+            }
+            m_renderRot += (m_renderRot - target) * (std::pow(0.3, ResponsiveValue(0, static_cast<double>(Scene::FrameCount()-m_frameCount))) - 1);
+            if (m_renderRot < 0) {
+                m_renderRot = std::fmod(m_renderRot, 2.0*std::numbers::pi) + 2.0*std::numbers::pi;
+            }
+            else {
+                m_renderRot = std::fmod(m_renderRot, 2.0*std::numbers::pi);
+            }
+
+            DebugLog(U"m_renderJudgeSize: " + Format(m_renderJudgeSize));
+            m_renderJudgeSize += (m_renderJudgeSize - 1) * (std::pow(0.4, ResponsiveValue(0, static_cast<double>(Scene::FrameCount()-m_judgeFrameCount))) - 1);
+
+            m_beforeFrameCount = Scene::FrameCount();
+        }
+        break;
+    }
     case State::Finished:
         changeScene(SceneState::Result, 0.25s);
         break;
@@ -588,39 +848,120 @@ void PlayScene::drawImpl() const
 
     Point center = Scene::Center();
 
+    Line{
+        center.x, 0,
+        center.x, center.y - 40_sch
+    }.draw(1_sch, Palette::Gray);
+    Line{
+        center.x, center.y + 40_sch,
+        center.x, Scene::Height()
+    }.draw(1_sch, Palette::Gray);
+    Line{
+        0, center.y,
+        center.x - 40_sch, center.y
+    }.draw(1_sch, Palette::Gray);
+    Line{
+        Scene::Width(), center.y,
+        center.x + 40_sch, center.y
+    }.draw(1_sch, Palette::Gray);
+
     // Rect{ center.x - 40_sch, center.y - 40_sch, 80_sch, 80_sch }.drawFrame(2_scw, Palette::Gray);
     // Left
     Line{
         center.x - 40_sch, center.y + 30_sch,
         center.x - 40_sch, center.y - 30_sch
-    }.draw(3_sch, m_currentLane == 0 ? Palette::White : Palette::Gray);
+    }.draw(3_sch, Palette::Gray);
     // Right
     Line{
         center.x + 40_sch, center.y + 30_sch,
         center.x + 40_sch, center.y - 30_sch
-    }.draw(3_sch, m_currentLane == 1 ? Palette::White : Palette::Gray);
+    }.draw(3_sch, Palette::Gray);
     // Top
     Line{
         center.x - 30_sch, center.y - 40_sch,
         center.x + 30_sch, center.y - 40_sch
-    }.draw(3_sch, m_currentLane == 2 ? Palette::White : Palette::Gray);
+    }.draw(3_sch, Palette::Gray);
     // Bottom
     Line{
         center.x - 30_sch, center.y + 40_sch,
         center.x + 30_sch, center.y + 40_sch
-    }.draw(3_sch, m_currentLane == 3 ? Palette::White : Palette::Gray);
+    }.draw(3_sch, Palette::Gray);
 
+    // Current
+    // rotation matrix
+    // [ cos(theta) -sin(theta) ][x]
+    // [ sin(theta)  sin(theta) ][y]
     Line{
-        center.x, 0,
-        center.x, Scene::Height()
-    }.draw(1_sch, Palette::Gray);
-    Line{
-        0, center.y,
-        Scene::Width(), center.y
-    }.draw(1_sch, Palette::Gray);
-    m_world.each<TransformComponent>([](const Entity, const TransformComponent& transform)
+        center.x + ((-40_sch)*std::cos(m_renderRot) - (30_sch)*std::sin(m_renderRot)),
+        center.y + ((-40_sch)*std::sin(m_renderRot) + (30_sch)*std::cos(m_renderRot)),
+
+        center.x + ((-40_sch)*std::cos(m_renderRot) - (-30_sch)*std::sin(m_renderRot)),
+        center.y + ((-40_sch)*std::sin(m_renderRot) + (-30_sch)*std::cos(m_renderRot)),
+    }.draw(KeyK.pressed() || KeyJ.pressed() ? 5_sch : 3_sch, Palette::White);
+
+    m_world.each<TransformComponent>([this](const Entity note, const TransformComponent& transform)
     {
-        Circle{ transform.position, 10_sch }.draw(Palette::White);
+        NoteComponent* note_component = *m_world.getComponent<NoteComponent*>(note);
+        
+        // auto& data = getData();
+        // DebugLog(
+        //     U"[" + Format(m_elapsedMilliSec) + U"] id [" + Format(note)
+        //     + U"] hitTime(ms): " + Format(note_component->hitTimeMilliSec + m_chartData.chartOffset)
+        //     + U", transform.position: " + Format(transform.position)
+        //     + U", ETA(ms): " + Format(note_component->hitTimeMilliSec + m_chartData.chartOffset + data.settings.offset - m_elapsedMilliSec)
+        //     + U", isJudged?: " + Format(note_component->judged));
+
+        if (!note_component->judged) {
+            switch (note_component->noteType) {
+                case NoteType::None:
+                    break;
+                case NoteType::NormalTap:
+                    Circle{ transform.position, 15_sch }.draw(Palette::White);
+                    break;
+                case NoteType::FlickLeft:
+                    normal_left.resized(40_sch).draw(Arg::center(transform.position));
+                    break;
+                case NoteType::FlickRight:
+                    normal_right.resized(40_sch).draw(Arg::center(transform.position));
+                    break;
+                case NoteType::FlickUp:
+                    normal_up.resized(40_sch).draw(Arg::center(transform.position));
+                    break;
+                case NoteType::FlickDown:
+                    normal_down.resized(40_sch).draw(Arg::center(transform.position));
+                    break;
+                case NoteType::Drag:
+                    Circle{ transform.position, 8_sch }.draw(Palette::Yellow);
+                    break;
+                case NoteType::DoubleTap:
+                    Circle{ transform.position, 15_sch }.draw(Palette::White);
+                    Circle{ transform.position, 15_sch }.drawFrame(3_sch, Palette::Orange);
+                    break;
+                default:
+                    Circle{ transform.position, 15_sch }.draw(Palette::White);
+                    break;
+            }
+        }
     });
+
+    if (Time::GetSec() - m_showJudgeTime < 1.0) {
+        switch (m_recentJudgement) {
+            case JudgementType::PerfectPlus:
+                m_font(U"Perfect+").draw(TextStyle::Outline(0.1_sch, Palette::White), 15_sch * m_renderJudgeSize, Arg::center(center - Vec2(0, 18_sch)), Palette::Pink);
+                break;
+            case JudgementType::Perfect:
+                m_font(U"Perfect").draw(TextStyle::Outline(0.1_sch, Palette::White), 15_sch * m_renderJudgeSize, Arg::center(center - Vec2(0, 18_sch)), Palette::Purple);
+                break;
+            case JudgementType::Good:
+                m_font(U"Good").draw(TextStyle::Outline(0.1_sch, Palette::White), 15_sch * m_renderJudgeSize, Arg::center(center - Vec2(0, 18_sch)), Palette::Orange);
+                break;
+            case JudgementType::Miss:
+                m_font(U"Miss").draw(TextStyle::Outline(0.1_sch, Palette::White), 15_sch * m_renderJudgeSize, Arg::center(center - Vec2(0, 18_sch)), Palette::Red);
+                break;
+        }
+    }
+    if (combo >= 2) {
+        m_font(Format(combo)).draw(12_sch, Arg::center(center + Vec2(0, 18_sch)), Palette::White);
+    }
     m_font((m_state == State::Finished) ? U"FINISHED" : U"PLAY  R: Finish").draw(20, 20);
 }

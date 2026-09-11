@@ -32,6 +32,7 @@ inline void DebugLog(const String& message) {
 #endif
 }
 
+[[noreturn]]
 inline void ThrowError(const String& message, const String& details = U"") {
 #ifdef __DEBUG__
     throw Error{ message + U"\nDetails: " + details };
