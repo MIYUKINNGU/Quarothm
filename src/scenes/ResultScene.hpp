@@ -1,6 +1,7 @@
 #pragma once
 #include "../Common.hpp"
 #include "../types/AbstractScene.hpp"
+#include "../utilities/ResponsiveValue.hpp"
 
 class ResultScene final : public AbstractScene<ResultScene>
 {

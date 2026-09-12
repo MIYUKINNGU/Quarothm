@@ -1052,5 +1052,5 @@ void PlayScene::drawImpl() const
     }
     m_font((m_state == State::Finished) ? U"FINISHED" : U"PLAY  R: Finish").draw(20, 20);
     m_font(U"{:09}"_fmt(data.presentPlayData.score)).draw(Arg::topRight(Vec2(Scene::Width() - 20, 20)), Palette::White);
-    m_font(Format(data.presentPlayData.accuracy) + U"%").draw(Arg::topRight(Vec2(Scene::Width() - 20, 42)), Palette::White);
+    m_font(U"{:.2f}%"_fmt(data.presentPlayData.accuracy)).draw(Arg::topRight(Vec2(Scene::Width() - 20, 42)), Palette::White);
 }
