@@ -37,11 +37,12 @@ private:
     std::vector<NoteComponent*>& getCurrentLane();
     size_t& getCurrentLaneReadingIdx();
     JudgementType judgeNote(NoteComponent* note_component, double perfect_plus_threshold = 16.66, double perfect_threshold = 45.0, double good_threshold = 100.0, double miss_threshold = 150.0);
-    bool isNoteLate(NoteComponent* note_component);
+    bool isNoteLate(NoteComponent* note_component) const;
     void processNoteMiss(NoteComponent* note_component, size_t& index);
     void processNormalJudged(NoteComponent* note_component, size_t& index);
     void processJudging(NoteComponent* note_component, size_t& index);
     void increaseJudgeCount();
+    double getNoteDiff(NoteComponent* note_component) const;
 
     std::vector<std::unique_ptr<NoteComponent>> noteStorage;
     size_t reading_idx_left = 0;
@@ -75,4 +76,5 @@ private:
     int32 m_frameCount = 0;
     int32 m_judgeFrameCount = 0;
     unsigned int combo = 0;
+    unsigned int maxNotesCount = 0;
 };

@@ -18,6 +18,8 @@ void InitializeScene::initialize()
             static_cast<ClearType>(object[U"clear"].get<int>()),
             static_cast<unsigned int>(object[U"score"].get<int32>()),
             static_cast<unsigned int>(object[U"maxCombo"].get<int32>()),
+            object[U"accuracy"].get<double>(),
+            static_cast<unsigned int>(object[U"perfectplus"].get<int32>()),
             static_cast<unsigned int>(object[U"perfect"].get<int32>()),
             static_cast<unsigned int>(object[U"good"].get<int32>()),
             static_cast<unsigned int>(object[U"miss"].get<int32>())

@@ -88,9 +88,12 @@ void PlayScene::beginPlaying()
             // 絶対ここ関数に分けるべきだった
 
             DebugLog(U"lane Id: " + trimmed_op.substr(5,1));
+            DebugLog(U"Operation Species: " + trimmed_op.substr(4,1));
             char32_t op_species = trimmed_op[4];
             char32_t lane = trimmed_op[5];
-            int32 measure = ParseInt<int32>(trimmed_op.substr(1,3));
+            DebugLog(U"measure(String): " + trimmed_op.substr(1,3));
+            int32 measure = ParseInt<int32>(trimmed_op.substr(1,3), Arg::radix = 10);
+            DebugLog(U"initilized measure");
             String notes_data = trimmed_op.split(':')[1];
             std::vector<NoteType> notes(notes_data.size() / 2);
             std::unordered_map<char32_t, std::vector<NoteType>> lanes = {};
@@ -100,7 +103,22 @@ void PlayScene::beginPlaying()
             }
             if (lanes.find(lane) != lanes.end()) {
                 notes = lanes[lane];
-                scaler = 2 * notes.size() / notes_data.size();
+
+                const size_t oldSize = notes.size();
+                const size_t newSize = notes_data.size() / 2;
+
+                if (newSize > oldSize) {
+                    // 既存データを新しい分解能へ拡張
+                    std::vector<NoteType> expanded(newSize, NoteType::None);
+
+                    for (size_t i = 0; i < oldSize; ++i) {
+                        expanded[i * newSize / oldSize] = notes[i];
+                    }
+
+                    notes = std::move(expanded);
+                }
+
+                scaler = notes.size() / newSize;
             }
             // 英語でも書いてるけどこういう処理は全てconstの連想配列型を用意しておけばめちゃめちゃ短く書ける
             // ひとまずop_species == U'5'は5行程度で書けるようになるはず
@@ -266,7 +284,10 @@ void PlayScene::beginPlaying()
         if (beats.find(i) != beats.end()) {
             current_beats = beats[i];
         }
-        if (susData.find(i) == susData.end()) continue;
+        if (susData.find(i) == susData.end()) {
+            current_time += 60000.0 * current_beats / current_bpm;
+            continue;
+        }
 
         if (susData[i].find(U'2') != susData[i].end()) {
             double divider = 60000.0 * current_beats / susData[i][U'2'].size() / current_bpm;
@@ -529,6 +550,8 @@ void PlayScene::beginPlaying()
     m_currentLane = m_value.second;
     m_renderRot = rot_map.at(m_currentLane);
 
+    maxNotesCount = m_chartData.laneDown.size() + m_chartData.laneUp.size() + m_chartData.laneLeft.size() + m_chartData.laneRight.size();
+
     data.presentPlayData = ScoreRecorder{};
 
     m_state = State::Playing;
@@ -573,17 +596,23 @@ JudgementType PlayScene::judgeNote(
     double good_threshold,
     double miss_threshold
 ) {
-    double diff = std::abs(note_component->hitTimeMilliSec + m_chartData.chartOffset - m_elapsedMilliSec);
+    double diff = std::abs(getNoteDiff(note_component));
     if (diff < perfect_plus_threshold) return JudgementType::PerfectPlus;
     if (diff < perfect_threshold) return JudgementType::Perfect;
     if (diff < good_threshold) return JudgementType::Good;
     if (diff < miss_threshold) return JudgementType::Miss;
-    if (m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > miss_threshold) return JudgementType::Miss;
+    if (-getNoteDiff(note_component) > miss_threshold) return JudgementType::Miss;
     return JudgementType::None;
 }
 
-bool PlayScene::isNoteLate(NoteComponent* note_component) {
-    return note_component->hitTimeMilliSec - m_elapsedMilliSec < 0;
+bool PlayScene::isNoteLate(NoteComponent* note_component) const {
+    return getNoteDiff(note_component) < 0;
+}
+
+// Late: -
+// Early: +
+double PlayScene::getNoteDiff(NoteComponent* note_component) const {
+    return note_component->hitTimeMilliSec - m_elapsedMilliSec + m_chartData.chartOffset + getData().settings.offset;
 }
 
 void PlayScene::processNoteMiss(NoteComponent* note_component, size_t& index) {
@@ -651,7 +680,7 @@ void PlayScene::updateImpl()
         {
             NoteComponent* note_component = *m_world.getComponent<NoteComponent*>(note);
 
-            double distance = (note_component->hitTimeMilliSec + m_chartData.chartOffset + data.settings.offset - m_elapsedMilliSec) * data.settings.noteSpeed * 0.1_sch;
+            double distance = getNoteDiff(note_component) * data.settings.noteSpeed * 0.1_sch;
 
             Point center = Scene::Center();
 
@@ -685,7 +714,8 @@ void PlayScene::updateImpl()
                 if (current_note->noteType == NoteType::NormalTap) {
                     processJudging(current_note, current_idx);
                 }
-                if (current_note->noteType == NoteType::Hold) {
+                JudgementType judge = judgeNote(current_note);
+                if (current_note->noteType == NoteType::Hold && judge != JudgementType::Miss && judge != JudgementType::None) {
                     starting_point_tapped = true;
                 }
             }
@@ -760,9 +790,10 @@ void PlayScene::updateImpl()
             if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
                 processNoteMiss(note_component, reading_idx_left);
             }
-            else if (note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
+            else if (starting_point_tapped && note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
                 m_recentJudgement = JudgementType::PerfectPlus;
                 processNormalJudged(note_component, reading_idx_left);
+                starting_point_tapped = false;
             }
         }
 
@@ -771,9 +802,10 @@ void PlayScene::updateImpl()
             if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
                 processNoteMiss(note_component, reading_idx_right);
             }
-            else if (note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
+            else if (starting_point_tapped && note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
                 m_recentJudgement = JudgementType::PerfectPlus;
                 processNormalJudged(note_component, reading_idx_right);
+                starting_point_tapped = false;
             }
         }
 
@@ -782,9 +814,10 @@ void PlayScene::updateImpl()
             if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
                 processNoteMiss(note_component, reading_idx_up);
             }
-            else if (note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
+            else if (starting_point_tapped && note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
                 m_recentJudgement = JudgementType::PerfectPlus;
                 processNormalJudged(note_component, reading_idx_up);
+                starting_point_tapped = false;
             }
         }
 
@@ -793,15 +826,38 @@ void PlayScene::updateImpl()
             if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
                 processNoteMiss(note_component, reading_idx_down);
             }
-            else if (note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
+            else if (starting_point_tapped && note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
                 m_recentJudgement = JudgementType::PerfectPlus;
                 processNormalJudged(note_component, reading_idx_down);
+                starting_point_tapped = false;
             }
         }
 
+        double basePoint = 100000000.0 / maxNotesCount;
+        data.presentPlayData.score = data.presentPlayData.perfectplus + ((data.presentPlayData.perfectplus + data.presentPlayData.perfect) + 0.3333 * data.presentPlayData.good) * basePoint;
+        unsigned int notesCount = data.presentPlayData.perfectplus + data.presentPlayData.perfect + data.presentPlayData.good + data.presentPlayData.miss;
+        if (notesCount != 0) data.presentPlayData.accuracy = 100.0 * (data.presentPlayData.perfectplus + data.presentPlayData.perfect / 3.0 + data.presentPlayData.good / 6.0) / notesCount;
+        else data.presentPlayData.accuracy = 100.0;
         if (KeyR.down() || !m_song_audio.isPlaying())
         {
-            data.presentPlayData.score = 987654;
+            if (data.presentPlayData.accuracy == 100.0) {
+                data.presentPlayData.clear = ClearType::MaxScore;
+            }
+            else if (data.presentPlayData.accuracy >= 70.0) {
+                data.presentPlayData.clear = ClearType::Cleared;
+                if (maxNotesCount == data.presentPlayData.perfectplus) {
+                    data.presentPlayData.clear = ClearType::MaxScore;
+                }
+                else if (maxNotesCount == data.presentPlayData.perfect + data.presentPlayData.perfectplus) {
+                    data.presentPlayData.clear = ClearType::AllPerfect;
+                }
+                else if (maxNotesCount == combo) {
+                    data.presentPlayData.clear = ClearType::FullCombo;
+                }
+            }
+            else {
+                data.presentPlayData.clear = ClearType::NonCleared;
+            }
             data.presentPlayData.maxCombo = std::max(data.presentPlayData.maxCombo, combo);
             m_state = State::Finished;
         }
@@ -845,6 +901,8 @@ void PlayScene::drawImpl() const
         m_font(U"NOW LOADING...").drawAt(Scene::Center(), Palette::White);
         return;
     }
+
+    auto& data = getData();
 
     Point center = Scene::Center();
 
@@ -899,7 +957,7 @@ void PlayScene::drawImpl() const
         center.y + ((-40_sch)*std::sin(m_renderRot) + (-30_sch)*std::cos(m_renderRot)),
     }.draw(KeyK.pressed() || KeyJ.pressed() ? 5_sch : 3_sch, Palette::White);
 
-    m_world.each<TransformComponent>([this](const Entity note, const TransformComponent& transform)
+    m_world.each<TransformComponent>([this, data](const Entity note, const TransformComponent& transform)
     {
         NoteComponent* note_component = *m_world.getComponent<NoteComponent*>(note);
         
@@ -937,6 +995,35 @@ void PlayScene::drawImpl() const
                     Circle{ transform.position, 15_sch }.draw(Palette::White);
                     Circle{ transform.position, 15_sch }.drawFrame(3_sch, Palette::Orange);
                     break;
+                case NoteType::Hold: {
+
+                    double distance = (getNoteDiff(note_component) + note_component->holdLength) * data.settings.noteSpeed * 0.1_sch;
+
+                    Point center = Scene::Center();
+                    Vec2 end_pos = transform.position;
+                    Vec2 start_pos = transform.position;
+
+                    switch (note_component->lane) {
+                    case 0:
+                        end_pos = Vec2{ center.x - 40_sch - distance, center.y };
+                        if (isNoteLate(note_component)) start_pos = Vec2{ center.x - 40_sch, center.y };
+                        break;
+                    case 2:
+                        end_pos = Vec2{ center.x, center.y - 40_sch - distance };
+                        if (isNoteLate(note_component)) start_pos = Vec2{ center.x, center.y - 40_sch };
+                        break;
+                    case 1:
+                        end_pos = Vec2{ center.x + 40_sch + distance, center.y };
+                        if (isNoteLate(note_component)) start_pos = Vec2{ center.x + 40_sch, center.y };
+                        break;
+                    case 3:
+                        end_pos = Vec2{ center.x, center.y + 40_sch + distance };
+                        if (isNoteLate(note_component)) start_pos = Vec2{ center.x, center.y + 40_sch };
+                        break;
+                    }
+                    Line{ start_pos, end_pos }.draw(10_sch, Palette::White);
+                    break;
+                }
                 default:
                     Circle{ transform.position, 15_sch }.draw(Palette::White);
                     break;
@@ -964,4 +1051,6 @@ void PlayScene::drawImpl() const
         m_font(Format(combo)).draw(12_sch, Arg::center(center + Vec2(0, 18_sch)), Palette::White);
     }
     m_font((m_state == State::Finished) ? U"FINISHED" : U"PLAY  R: Finish").draw(20, 20);
+    m_font(U"{:09}"_fmt(data.presentPlayData.score)).draw(Arg::topRight(Vec2(Scene::Width() - 20, 20)), Palette::White);
+    m_font(Format(data.presentPlayData.accuracy) + U"%").draw(Arg::topRight(Vec2(Scene::Width() - 20, 42)), Palette::White);
 }
