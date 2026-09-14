@@ -12,6 +12,7 @@ public:
     void drawImpl() const;
 
 private:
-    const Font m_headingFont{ FontMethod::MSDF, 42, Typeface::Bold };
-    const Font m_bodyFont{ 26 };
+    const Font m_headingFont{ FontMethod::MSDF, 42_sch, Typeface::Bold };
+    const Font m_bodyFont{ FontMethod::MSDF, 26_sch };
+    unsigned int m_record_score = 0;
 };

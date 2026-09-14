@@ -26,6 +26,7 @@
 /assets/cache/
 /assets/generated/
 /saves/cache_data.json
+/saves/play_records.json
 
 # Decide how to handle an audio files, a jacket files, and etc later.
 /assets/songs/*/*.wav
