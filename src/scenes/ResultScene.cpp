@@ -65,7 +65,27 @@ void ResultScene::drawImpl() const
     double accuracy = data.presentPlayData.accuracy;
 
     long long diff = (long long)score-(long long)m_record_score;
-    m_headingFont(U"RESULT").draw(42_sch, Arg::center(center.x, center.y - 200_sch), Palette::Yellow);
+
+    m_headingFont(U"RESULT").draw(24.0_sch, Vec2{ 26_sch, 15_sch }, Palette::White);
+    switch (data.presentPlayData.clear) {
+        case ClearType::NonCleared:
+            m_headingFont(U"CLEAR FAILED").draw(38_sch, Arg::center(center.x, center.y - 200_sch), Palette::Red);
+            break;
+        case ClearType::Cleared:
+            m_headingFont(U"CLEAR COMPLETED").draw(38_sch, Arg::center(center.x, center.y - 200_sch), Palette::Yellow);
+            break;
+        case ClearType::FullCombo:
+            m_headingFont(U"FULL COMBO").draw(38_sch, Arg::center(center.x, center.y - 200_sch), Palette::Orange);
+            break;
+        case ClearType::AllPerfect:
+            m_headingFont(U"FLAWLESS GAME").draw(38_sch, Arg::center(center.x, center.y - 200_sch), Palette::Purple);
+            break;
+        case ClearType::MaxScore:
+            m_headingFont(U"FLAWLESS GAME").draw(38_sch, Arg::center(center.x, center.y - 200_sch), Palette::Pink);
+            break;
+    }
+
+    // TODO: クリアかの表示を追加
     m_bodyFont(U"{:09}"_fmt(score)).draw(30_sch, Arg::center(center.x, center.y - 145_sch));
     m_bodyFont(U"{:.2f}%"_fmt(accuracy)).draw(20_sch, Arg::rightCenter(center.x + 200_sch, center.y - 145_sch));
     m_bodyFont(U"High Score").draw(16_sch, Arg::leftCenter(center.x - 200_sch, center.y - 100_sch));

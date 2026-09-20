@@ -70,7 +70,7 @@ void SongSelectScene::updateImpl()
         changeScene(SceneState::Title, 0.0s);
         return;
     }
-    if (KeyLeft.down())
+    if (KeyLeft.down() || KeyA.down())
     {
         const auto& songs_in_folder = m_songFolderRegistry.at(data.selectedSong.selectedFolderSpecies);
         if (data.selectedSong.selectedSongIndex > 0)
@@ -80,7 +80,7 @@ void SongSelectScene::updateImpl()
             m_frameCount = Scene::FrameCount();
         }
     }
-    else if (KeyRight.down())
+    else if (KeyRight.down() || KeyD.down())
     {
         const auto& songs_in_folder = m_songFolderRegistry.at(data.selectedSong.selectedFolderSpecies);
         if (data.selectedSong.selectedSongIndex < songs_in_folder.size() - 1)
@@ -88,6 +88,26 @@ void SongSelectScene::updateImpl()
             data.selectedSong.selectedSongIndex++;
             data.selectedSong.selectedSongData = songs_in_folder[data.selectedSong.selectedSongIndex];
             m_frameCount = Scene::FrameCount();
+        }
+    }
+    else if (KeyUp.down() || KeyW.down()) {
+        switch (data.selectedSong.selectedDifficulty) {
+            case Difficulty::Easy:
+                data.selectedSong.selectedDifficulty = Difficulty::Normal;
+                break;
+            case Difficulty::Normal:
+                data.selectedSong.selectedDifficulty = Difficulty::Expert;
+                break;
+        }
+    }
+    else if (KeyDown.down() || KeyS.down()) {
+        switch (data.selectedSong.selectedDifficulty) {
+            case Difficulty::Expert:
+                data.selectedSong.selectedDifficulty = Difficulty::Normal;
+                break;
+            case Difficulty::Normal:
+                data.selectedSong.selectedDifficulty = Difficulty::Easy;
+                break;
         }
     }
     if (KeyEnter.down())
@@ -108,7 +128,7 @@ void SongSelectScene::drawImpl() const
     const Vec2 center = Scene::CenterF();
     const auto& data = getData();
 
-    m_bodyFont(U"楽曲選曲").draw(24.0_sch, Vec2{ 26, 15 }, Palette::White);
+    m_bodyFont(U"楽曲選曲").draw(24.0_sch, Vec2{ 26_sch, 15_sch }, Palette::White);
 
     double scroll_offset = 73.33333_sch;
     const SongsFolderSpecies selected_folder_species = data.selectedSong.selectedFolderSpecies;
@@ -142,19 +162,36 @@ void SongSelectScene::drawImpl() const
             basePos = Vec2(-36.66666 + 166.66666 * render_index_i, -90);
             text_x = 36.6666 + 166.6666 * render_index_i;
         }
+
+        Color background_color;
+        Color color;
+        switch (data.selectedSong.selectedDifficulty) {
+            case Difficulty::Easy:
+                background_color = Palette::Lightskyblue;
+                color = Palette::Black;
+                break;
+            case Difficulty::Normal:
+                background_color = Palette::Lightgreen;
+                color = Palette::Black;
+                break;
+            case Difficulty::Expert:
+                background_color = Palette::Orangered;
+                color = Palette::White;
+                break;
+        }
     
         RoundRect{
             center.x + ResponsiveValue(basePos.x), center.y + ResponsiveValue(basePos.y),
             ResponsiveValue(220 * baseMultipler), ResponsiveValue(330 * baseMultipler),
             5
-        }.draw(ColorF{ 0.12, 0.22, 0.35 });
+        }.draw(background_color);
         m_bodyFont(song_data.title).draw(
             24.0_sch * baseMultipler,
             Arg::center(Vec2{
                 center.x + ResponsiveValue(text_x),
                 center.y + ResponsiveValue(-0.311111111 * basePos.y + 78.6666)
             }),
-            Palette::White
+            color
         );
     }
 
