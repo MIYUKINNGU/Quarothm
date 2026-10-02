@@ -836,7 +836,7 @@ void PlayScene::updateImpl()
         double basePoint = 100000000.0 / maxNotesCount;
         data.presentPlayData.score = data.presentPlayData.perfectplus + ((data.presentPlayData.perfectplus + data.presentPlayData.perfect) + 0.3333 * data.presentPlayData.good) * basePoint;
         unsigned int notesCount = data.presentPlayData.perfectplus + data.presentPlayData.perfect + data.presentPlayData.good + data.presentPlayData.miss;
-        if (notesCount != 0) data.presentPlayData.accuracy = 100.0 * (data.presentPlayData.perfectplus + data.presentPlayData.perfect / 3.0 + data.presentPlayData.good / 6.0) / notesCount;
+        if (notesCount != 0) data.presentPlayData.accuracy = 100.0 * (data.presentPlayData.perfectplus + data.presentPlayData.perfect / 1.25 + data.presentPlayData.good / 3.0) / notesCount;
         else data.presentPlayData.accuracy = 100.0;
         if (KeyR.down() || !m_song_audio.isPlaying())
         {
