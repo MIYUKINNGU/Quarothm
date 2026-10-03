@@ -1,5 +1,10 @@
 #include "SongSelectScene.hpp"
 
+template <typename T>
+inline bool contains_vector(const std::vector<T>& vec, const T& value) {
+    return std::find(vec.begin(), vec.end(), value) != vec.end();
+}
+
 void SongSelectScene::initialize()
 {
     const JSON song_list_json = JSON::Load(U"assets/songs/songs_list.json");
@@ -12,11 +17,17 @@ void SongSelectScene::initialize()
     for (const auto& [index, object] : song_list_json)
     {
         const unsigned long long song_id = static_cast<unsigned long long>(object[U"id"].get<int32>());
+        std::vector<String> additional_labels;
+        for (const auto& [index, label] : object[U"additional_labels"])
+        {
+            additional_labels.push_back(label.getString());
+        }
         const SongData song_data{
             song_id,
             object[U"title"].getString(),
             object[U"artist"].getString(),
             object[U"path"].getString(),
+            additional_labels
         };
         m_songRegistry[song_id] = song_data;
     }
@@ -59,7 +70,62 @@ void SongSelectScene::initialize()
         static_cast<Difficulty>(data.cache[U"last_selected_difficulty"].get<int32>())
     };
 
+    for (const auto& [index, id] : data.cache[U"unlocked_hidden_songs"]) {
+        m_unlocked_hidden.push_back(id.get<int32>());
+    }
+
     m_renderIndex = data.selectedSong.selectedSongIndex;
+}
+
+void SongSelectScene::store2Cache()
+{
+    auto& data = getData();
+    data.cache[U"last_selected_song_id"] = static_cast<int32>(data.selectedSong.selectedSongData.id);
+    data.cache[U"last_selected_song_folder_id"] = static_cast<int32>(data.selectedSong.selectedFolderSpecies);
+    data.cache[U"last_selected_song_index"] = static_cast<int32>(data.selectedSong.selectedSongIndex);
+    data.cache[U"last_selected_difficulty"] = static_cast<int32>(data.selectedSong.selectedDifficulty);
+}
+
+void SongSelectScene::selectRightSideSong()
+{
+    auto& data = getData();
+    const auto& songs_in_folder = m_songFolderRegistry.at(data.selectedSong.selectedFolderSpecies);
+
+    size_t before_index = data.selectedSong.selectedSongIndex;
+    do {
+        data.selectedSong.selectedSongIndex++;
+    } while (data.selectedSong.selectedSongIndex < songs_in_folder.size()
+         && contains_vector<String>(songs_in_folder[data.selectedSong.selectedSongIndex].additionalLabels, U"default_hidden")
+         && !contains_vector<unsigned long long>(m_unlocked_hidden, songs_in_folder[data.selectedSong.selectedSongIndex].id));
+    
+    if (data.selectedSong.selectedSongIndex >= songs_in_folder.size()) data.selectedSong.selectedSongIndex = before_index;
+    data.selectedSong.selectedSongData = songs_in_folder[data.selectedSong.selectedSongIndex];
+    data.selectedSong.selectedSongId =  data.selectedSong.selectedSongData.id;
+    m_frameCount = Scene::FrameCount();
+    
+} // ここらへん動作確認する
+
+void SongSelectScene::selectLeftSideSong()
+{
+    auto& data = getData();
+    const auto& songs_in_folder = m_songFolderRegistry.at(data.selectedSong.selectedFolderSpecies);
+    size_t before_index = data.selectedSong.selectedSongIndex;
+    for (const auto& [index, id] : data.cache[U"unlocked_hidden_songs"]) {
+        m_unlocked_hidden.push_back(static_cast<unsigned long long>(id.get<int32>()));
+    }
+    if (data.selectedSong.selectedSongIndex > 0) do {
+        data.selectedSong.selectedSongIndex--;
+    } while (data.selectedSong.selectedSongIndex > 0
+         && contains_vector<String>(songs_in_folder[data.selectedSong.selectedSongIndex].additionalLabels, U"default_hidden")
+         && !contains_vector<unsigned long long>(m_unlocked_hidden, songs_in_folder[data.selectedSong.selectedSongIndex].id));
+
+    if (contains_vector<String>(songs_in_folder[data.selectedSong.selectedSongIndex].additionalLabels, U"default_hidden")
+         && !contains_vector<unsigned long long>(m_unlocked_hidden, songs_in_folder[data.selectedSong.selectedSongIndex].id)) {
+        data.selectedSong.selectedSongIndex = before_index;
+    }
+    data.selectedSong.selectedSongData = songs_in_folder[data.selectedSong.selectedSongIndex];
+    data.selectedSong.selectedSongId =  data.selectedSong.selectedSongData.id;
+    m_frameCount = Scene::FrameCount();
 }
 
 void SongSelectScene::updateImpl()
@@ -72,23 +138,11 @@ void SongSelectScene::updateImpl()
     }
     if (KeyLeft.down() || KeyA.down())
     {
-        const auto& songs_in_folder = m_songFolderRegistry.at(data.selectedSong.selectedFolderSpecies);
-        if (data.selectedSong.selectedSongIndex > 0)
-        {
-            data.selectedSong.selectedSongIndex--;
-            data.selectedSong.selectedSongData = songs_in_folder[data.selectedSong.selectedSongIndex];
-            m_frameCount = Scene::FrameCount();
-        }
+        selectLeftSideSong();
     }
     else if (KeyRight.down() || KeyD.down())
     {
-        const auto& songs_in_folder = m_songFolderRegistry.at(data.selectedSong.selectedFolderSpecies);
-        if (data.selectedSong.selectedSongIndex < songs_in_folder.size() - 1)
-        {
-            data.selectedSong.selectedSongIndex++;
-            data.selectedSong.selectedSongData = songs_in_folder[data.selectedSong.selectedSongIndex];
-            m_frameCount = Scene::FrameCount();
-        }
+        selectRightSideSong();
     }
     else if (KeyUp.down() || KeyW.down()) {
         switch (data.selectedSong.selectedDifficulty) {
@@ -110,10 +164,15 @@ void SongSelectScene::updateImpl()
                 break;
         }
     }
-    if (KeyEnter.down())
+    if (KeyEnter.down() || KeyK.down())
     {
         data.presentPlayData.score = 0;
         data.presentPlayData.maxCombo = 0;
+        std::vector<String> additional_labels = data.selectedSong.selectedSongData.additionalLabels;
+        if (contains_vector<String>(additional_labels, U"only_expert") && data.selectedSong.selectedDifficulty != Difficulty::Expert) {
+            data.selectedSong.selectedDifficulty = Difficulty::Expert;
+        }
+        store2Cache();
         changeScene(SceneState::Play, 0.0s);
     }
 
@@ -121,6 +180,7 @@ void SongSelectScene::updateImpl()
         m_renderIndex += (m_renderIndex - data.selectedSong.selectedSongIndex) * (std::pow(0.5, ResponsiveValue(0, static_cast<double>(Scene::FrameCount()-m_frameCount))) - 1);
         m_beforeFrameCount = Scene::FrameCount();
     }
+    store2Cache();
 }
 
 void SongSelectScene::drawImpl() const
@@ -134,12 +194,20 @@ void SongSelectScene::drawImpl() const
     const SongsFolderSpecies selected_folder_species = data.selectedSong.selectedFolderSpecies;
     const SongData selected_song = data.selectedSong.selectedSongData;
     const auto& songs_in_folder = m_songFolderRegistry.at(selected_folder_species);
-        
+    
+    int view_index = 0;
+    int skipped_count = 0;
     for (size_t i = 0; i < songs_in_folder.size(); i++)
     {
         const SongData& song_data = songs_in_folder[i];
 
-        double render_index_i = i - m_renderIndex;
+        double render_index_i = view_index - m_renderIndex + skipped_count;
+
+        if (contains_vector<String>(song_data.additionalLabels, U"default_hidden")
+         && !contains_vector<unsigned long long>(m_unlocked_hidden, song_data.id)) {
+            skipped_count++;
+            continue;
+        }
 
         Vec2 basePos(0, 0);
         double text_x = 0;
@@ -179,6 +247,10 @@ void SongSelectScene::drawImpl() const
                 color = Palette::White;
                 break;
         }
+        if (contains_vector<String>(song_data.additionalLabels, U"only_expert")) {
+            background_color = Palette::Orangered;
+            color = Palette::White;
+        }
     
         RoundRect{
             center.x + ResponsiveValue(basePos.x), center.y + ResponsiveValue(basePos.y),
@@ -193,6 +265,8 @@ void SongSelectScene::drawImpl() const
             }),
             color
         );
+
+        view_index++;
     }
 
     // +35 -> 0 -> +35

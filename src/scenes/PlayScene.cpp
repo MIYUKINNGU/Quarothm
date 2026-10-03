@@ -40,8 +40,8 @@ void PlayScene::beginPlaying()
     TextReader chart_reader{ CombinePath(songDir, Format(static_cast<int32>(data.selectedSong.selectedDifficulty)) + U".sus") };
 
     String op;
-    std::unordered_map<int32, double> bpm_list;
-    std::unordered_map<int32, int32> bpm_changer;
+    std::unordered_map<String, double> bpm_list;
+    std::unordered_map<int32, String> bpm_changer;
     std::unordered_map<int32, int32> beats;
     //                measure                      lane                 species
     std::unordered_map<int32, std::unordered_map<char32_t, std::vector<NoteType>>> susData;
@@ -65,21 +65,21 @@ void PlayScene::beginPlaying()
         if (trimmed_op.starts_with(U"#BPM")) {
             DebugLog(U"Loading a BPM Defination");
             String nonspaced_trimmed_op = trimmed_op.replaced(U" ", U"").replaced(U"\t", U"");
-            bpm_list[ParseInt<int32>(nonspaced_trimmed_op.substr(4, 2))] = Parse<double>(nonspaced_trimmed_op.split(':')[1]);
+            bpm_list[nonspaced_trimmed_op.substr(4, 2)] = Parse<double>(nonspaced_trimmed_op.split(':')[1]);
             DebugLog(U"Loaded a BPM Defination");
             continue;
         }
         if (trimmed_op.size() > 4 && trimmed_op.substr(4, 2) == U"08") {
             DebugLog(U"Loading a BPM changer");
             String nonspaced_trimmed_op = trimmed_op.replaced(U" ", U"").replaced(U"\t", U"");
-            bpm_changer[ParseInt<int32>(nonspaced_trimmed_op.substr(1, 3))] = ParseInt<int32>(nonspaced_trimmed_op.split(':')[1]);
+            bpm_changer[ParseInt<int32>(nonspaced_trimmed_op.substr(1, 3), Arg::radix = 10)] = nonspaced_trimmed_op.split(':')[1];
             DebugLog(U"Loaded a BPM changer");
             continue;
         }
         if (trimmed_op.size() > 4 && trimmed_op.substr(4, 2) == U"02") {
             DebugLog(U"Loading a beats");
             String nonspaced_trimmed_op = trimmed_op.replaced(U" ", U"").replaced(U"\t", U"");
-            beats[ParseInt<int32>(nonspaced_trimmed_op.substr(1, 3))] = Parse<double>(nonspaced_trimmed_op.split(':')[1]);
+            beats[ParseInt<int32>(nonspaced_trimmed_op.substr(1, 3), Arg::radix = 10)] = Parse<double>(nonspaced_trimmed_op.split(':')[1]);
             DebugLog(U"Loaded a beats");
             continue;
         }

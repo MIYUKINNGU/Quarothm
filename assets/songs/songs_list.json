@@ -3,30 +3,35 @@
         "id": 1,
         "title": "M1LLI0N PP",
         "artist": "Camellia",
-        "path": "assets/songs/M1LLI0N_PP"
+        "path": "assets/songs/M1LLI0N_PP",
+        "additional_labels": ["default_hidden", "only_expert"]
     },
     {
         "id": 2,
         "title": "Sample2 Song",
         "artist": "Various Artists",
-        "path": "assets/songs/sample_song"
+        "path": "assets/songs/sample_song",
+        "additional_labels": []
     },
     {
         "id": 3,
         "title": "Sample3 Song",
         "artist": "Various Artists",
-        "path": "assets/songs/sample_song"
+        "path": "assets/songs/sample_song",
+        "additional_labels": []
     },
     {
         "id": 4,
         "title": "Sample4 Song",
         "artist": "Various Artists",
-        "path": "assets/songs/sample_song"
+        "path": "assets/songs/sample_song",
+        "additional_labels": []
     },
     {
         "id": 5,
         "title": "Sample5 Song",
         "artist": "Various Artists",
-        "path": "assets/songs/sample_song"
+        "path": "assets/songs/sample_song",
+        "additional_labels": []
     }
 ]

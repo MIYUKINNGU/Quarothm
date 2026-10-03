@@ -12,6 +12,9 @@ public:
     void initialize();
     void updateImpl();
     void drawImpl() const;
+    void store2Cache();
+    void selectRightSideSong();
+    void selectLeftSideSong();
 
 private:
     const Font m_headingFont{ FontMethod::MSDF, 40, Typeface::Bold };
@@ -23,4 +26,5 @@ private:
     double m_renderIndex;
     unsigned long long m_frameCount = 0;
     unsigned long long m_beforeFrameCount = 0;
+    std::vector<unsigned long long> m_unlocked_hidden;
 };
