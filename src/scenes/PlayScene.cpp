@@ -957,8 +957,40 @@ void PlayScene::drawImpl() const
         center.y + ((-40_sch)*std::sin(m_renderRot) + (-30_sch)*std::cos(m_renderRot)),
     }.draw(KeyK.pressed() || KeyJ.pressed() ? 5_sch : 3_sch, Palette::White);
 
-    m_world.each<TransformComponent>([this, data](const Entity note, const TransformComponent& transform)
+    std::vector<std::pair<Entity, std::reference_wrapper<const TransformComponent>>> notes;
+
+    m_world.each<TransformComponent>(
+        [&notes](const Entity note, const TransformComponent& transform)
+        {
+            notes.emplace_back(note, std::cref(transform));
+        }
+    );
+
+    std::sort(notes.begin(), notes.end(),
+        [this](const auto& a, const auto& b)
+        {
+            NoteComponent* note_a =
+                *m_world.getComponent<NoteComponent*>(a.first);
+
+            NoteComponent* note_b =
+                *m_world.getComponent<NoteComponent*>(b.first);
+
+            const bool a_is_hold = (note_a->noteType == NoteType::Hold);
+            const bool b_is_hold = (note_b->noteType == NoteType::Hold);
+
+            if (a_is_hold != b_is_hold)
+            {
+                return a_is_hold;
+            }
+
+            return note_a->hitTimeMilliSec > note_b->hitTimeMilliSec;
+        }
+    );
+
+    for (const auto& [note, transform_ref] : notes)
     {
+        const TransformComponent& transform = transform_ref.get();
+
         NoteComponent* note_component = *m_world.getComponent<NoteComponent*>(note);
         
         // auto& data = getData();
@@ -975,6 +1007,7 @@ void PlayScene::drawImpl() const
                     break;
                 case NoteType::NormalTap:
                     Circle{ transform.position, 15_sch }.draw(Palette::White);
+                    Circle{ transform.position, 15_sch }.drawFrame(2_sch, Palette::Black);
                     break;
                 case NoteType::FlickLeft:
                     normal_left.resized(40_sch).draw(Arg::center(transform.position));
@@ -990,6 +1023,7 @@ void PlayScene::drawImpl() const
                     break;
                 case NoteType::Drag:
                     Circle{ transform.position, 8_sch }.draw(Palette::Yellow);
+                    Circle{ transform.position, 8_sch }.drawFrame(1_sch, Palette::Cyan);
                     break;
                 case NoteType::DoubleTap:
                     Circle{ transform.position, 15_sch }.draw(Palette::White);
@@ -1021,7 +1055,7 @@ void PlayScene::drawImpl() const
                         if (isNoteLate(note_component)) start_pos = Vec2{ center.x, center.y + 40_sch };
                         break;
                     }
-                    Line{ start_pos, end_pos }.draw(10_sch, Palette::White);
+                    Line{ start_pos, end_pos }.draw(10_sch, Palette::Cyan);
                     break;
                 }
                 default:
@@ -1029,7 +1063,7 @@ void PlayScene::drawImpl() const
                     break;
             }
         }
-    });
+    }
 
     if (Time::GetSec() - m_showJudgeTime < 1.0) {
         switch (m_recentJudgement) {
