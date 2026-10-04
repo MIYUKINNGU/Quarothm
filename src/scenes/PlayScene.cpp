@@ -2,6 +2,8 @@
 
 #include "../ecs/RhythmComponents.hpp"
 
+#include <numeric>
+
 void PlayScene::initialize()
 {
     m_state = State::Loading;
@@ -107,12 +109,13 @@ void PlayScene::beginPlaying()
                 const size_t oldSize = notes.size();
                 const size_t newSize = notes_data.size() / 2;
 
-                if (newSize > oldSize) {
-                    // 既存データを新しい分解能へ拡張
-                    std::vector<NoteType> expanded(newSize, NoteType::None);
+                if (newSize != oldSize) {
+                    // 既存データと今回のデータを両方とも表現できる分解能へ拡張
+                    const size_t mergedSize = std::lcm(oldSize, newSize);
+                    std::vector<NoteType> expanded(mergedSize, NoteType::None);
 
                     for (size_t i = 0; i < oldSize; ++i) {
-                        expanded[i * newSize / oldSize] = notes[i];
+                        expanded[i * mergedSize / oldSize] = notes[i];
                     }
 
                     notes = std::move(expanded);
@@ -700,23 +703,25 @@ void PlayScene::updateImpl()
             }
         });
 
-        size_t& current_idx = getCurrentLaneReadingIdx();
         std::vector<NoteComponent*>& current_lane = getCurrentLane();
         // DebugLog(U"m_currentLane: " + Format(m_currentLane));
-        // DebugLog(U"current_idx: " + Format(current_idx));
         // DebugLog(U"reading_idx_left: " + Format(reading_idx_left));
         // DebugLog(U"reading_idx_right: " + Format(reading_idx_right));
         // DebugLog(U"reading_idx_up: " + Format(reading_idx_up));
         // DebugLog(U"reading_idx_down: " + Format(reading_idx_down));
-        if (current_lane.size() > current_idx) {
-            NoteComponent* current_note = current_lane[current_idx];
+        const auto current_note_it = std::find_if(current_lane.begin(), current_lane.end(), [](NoteComponent* note_component) {
+            return !note_component->judged && note_component->noteType != NoteType::Hold;
+        });
+        const auto hold_note_it = std::find_if(current_lane.begin(), current_lane.end(), [](NoteComponent* note_component) {
+            return !note_component->judged && note_component->noteType == NoteType::Hold;
+        });
+
+        if (current_note_it != current_lane.end()) {
+            NoteComponent* current_note = *current_note_it;
+            size_t current_idx = std::distance(current_lane.begin(), current_note_it);
             if (KeyJ.down() || KeyK.down()) {
                 if (current_note->noteType == NoteType::NormalTap) {
                     processJudging(current_note, current_idx);
-                }
-                JudgementType judge = judgeNote(current_note);
-                if (current_note->noteType == NoteType::Hold && judge != JudgementType::Miss && judge != JudgementType::None) {
-                    starting_point_tapped = true;
                 }
             }
             if (KeyJ.down() && KeyK.pressed() || KeyJ.pressed() && KeyK.down()) {
@@ -759,10 +764,18 @@ void PlayScene::updateImpl()
                     }
                 }
             }
-            if (current_note->noteType == NoteType::Hold) {
-                if (!(KeyK.pressed() || KeyJ.pressed())) {
-                    starting_point_tapped = false;
+        }
+
+        if (hold_note_it != current_lane.end()) {
+            NoteComponent* hold_note = *hold_note_it;
+            if (KeyJ.down() || KeyK.down()) {
+                JudgementType judge = judgeNote(hold_note);
+                if (judge != JudgementType::Miss && judge != JudgementType::None) {
+                    starting_point_tapped = true;
                 }
+            }
+            if (!(KeyK.pressed() || KeyJ.pressed())) {
+                starting_point_tapped = false;
             }
         }
 
@@ -783,55 +796,39 @@ void PlayScene::updateImpl()
             m_frameCount = Scene::FrameCount();
         }
 
-        NoteComponent* note_component;
-        if (m_chartData.laneLeft.size() > reading_idx_left) {
-            note_component = m_chartData.laneLeft[reading_idx_left];
-            
-            if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
-                processNoteMiss(note_component, reading_idx_left);
+        const auto process_lane_notes = [this](std::vector<NoteComponent*>& lane) {
+            const auto note_it = std::find_if(lane.begin(), lane.end(), [](NoteComponent* note_component) {
+                return !note_component->judged && note_component->noteType != NoteType::Hold;
+            });
+            if (note_it != lane.end()) {
+                NoteComponent* note_component = *note_it;
+                size_t note_idx = std::distance(lane.begin(), note_it);
+                if (m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
+                    processNoteMiss(note_component, note_idx);
+                }
             }
-            else if (starting_point_tapped && note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
-                m_recentJudgement = JudgementType::PerfectPlus;
-                processNormalJudged(note_component, reading_idx_left);
-                starting_point_tapped = false;
-            }
-        }
 
-        if (m_chartData.laneRight.size() > reading_idx_right) {
-            note_component = m_chartData.laneRight[reading_idx_right];
-            if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
-                processNoteMiss(note_component, reading_idx_right);
+            const auto hold_note_it = std::find_if(lane.begin(), lane.end(), [](NoteComponent* note_component) {
+                return !note_component->judged && note_component->noteType == NoteType::Hold;
+            });
+            if (hold_note_it != lane.end()) {
+                NoteComponent* hold_note = *hold_note_it;
+                size_t hold_note_idx = std::distance(lane.begin(), hold_note_it);
+                if (!starting_point_tapped && m_elapsedMilliSec - hold_note->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
+                    processNoteMiss(hold_note, hold_note_idx);
+                }
+                else if (starting_point_tapped && m_elapsedMilliSec - hold_note->hitTimeMilliSec - hold_note->holdLength - m_chartData.chartOffset > 0.0) {
+                    m_recentJudgement = JudgementType::PerfectPlus;
+                    processNormalJudged(hold_note, hold_note_idx);
+                    starting_point_tapped = false;
+                }
             }
-            else if (starting_point_tapped && note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
-                m_recentJudgement = JudgementType::PerfectPlus;
-                processNormalJudged(note_component, reading_idx_right);
-                starting_point_tapped = false;
-            }
-        }
+        };
 
-        if (m_chartData.laneUp.size() > reading_idx_up) {
-            note_component = m_chartData.laneUp[reading_idx_up];
-            if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
-                processNoteMiss(note_component, reading_idx_up);
-            }
-            else if (starting_point_tapped && note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
-                m_recentJudgement = JudgementType::PerfectPlus;
-                processNormalJudged(note_component, reading_idx_up);
-                starting_point_tapped = false;
-            }
-        }
-
-        if (m_chartData.laneDown.size() > reading_idx_down) {
-            note_component = m_chartData.laneDown[reading_idx_down];
-            if ((!starting_point_tapped || note_component->noteType != NoteType::Hold) && m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
-                processNoteMiss(note_component, reading_idx_down);
-            }
-            else if (starting_point_tapped && note_component->noteType == NoteType::Hold && m_elapsedMilliSec - note_component->hitTimeMilliSec - note_component->holdLength - m_chartData.chartOffset > 0.0) {
-                m_recentJudgement = JudgementType::PerfectPlus;
-                processNormalJudged(note_component, reading_idx_down);
-                starting_point_tapped = false;
-            }
-        }
+        process_lane_notes(m_chartData.laneLeft);
+        process_lane_notes(m_chartData.laneRight);
+        process_lane_notes(m_chartData.laneUp);
+        process_lane_notes(m_chartData.laneDown);
 
         double basePoint = 100000000.0 / maxNotesCount;
         data.presentPlayData.score = data.presentPlayData.perfectplus + ((data.presentPlayData.perfectplus + data.presentPlayData.perfect) + 0.3333 * data.presentPlayData.good) * basePoint;
@@ -881,7 +878,7 @@ void PlayScene::updateImpl()
                 m_renderRot = std::fmod(m_renderRot, 2.0*std::numbers::pi);
             }
 
-            DebugLog(U"m_renderJudgeSize: " + Format(m_renderJudgeSize));
+            // DebugLog(U"m_renderJudgeSize: " + Format(m_renderJudgeSize));
             m_renderJudgeSize += (m_renderJudgeSize - 1) * (std::pow(0.4, ResponsiveValue(0, static_cast<double>(Scene::FrameCount()-m_judgeFrameCount))) - 1);
 
             m_beforeFrameCount = Scene::FrameCount();
