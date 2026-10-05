@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "../types/AbstractScene.hpp"
 #include <cmath>
+#include "../utilities/FilePath.hpp"
 
 class SongSelectScene final : public AbstractScene<SongSelectScene>
 {
@@ -25,6 +26,7 @@ private:
     std::vector<SongData> m_songList{};
     std::unordered_map<unsigned long long, SongData> m_songRegistry;
     std::unordered_map<SongsFolderSpecies, std::vector<SongData>> m_songFolderRegistry;
+    std::unordered_map<unsigned long long, Texture> m_jacketTextures;
     double m_renderIndex;
     unsigned long long m_frameCount = 0;
     unsigned long long m_beforeFrameCount = 0;

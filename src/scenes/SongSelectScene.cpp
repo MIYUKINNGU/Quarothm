@@ -65,6 +65,25 @@ void SongSelectScene::initialize()
         }
     }
 
+    for (const auto& [song_id, song_data] : m_songRegistry)
+    {
+        TextReader meta_reader{ CombinePath(song_data.songFilePath, U"meta") };
+        String audio_extension;
+        String jacket_extension;
+        if (meta_reader && meta_reader.readLine(audio_extension) && meta_reader.readLine(jacket_extension))
+        {
+            const String jacket_path = CombinePath(song_data.songFilePath, U"jacket." + jacket_extension);
+            if (FileSystem::Exists(jacket_path))
+            {
+                Texture jacket{ jacket_path };
+                if (not jacket.isEmpty())
+                {
+                    m_jacketTextures.emplace(song_id, std::move(jacket));
+                }
+            }
+        }
+    }
+
     auto& data = getData();
 
     if (data.cache.contains(U"settings_note_speed")) {
@@ -116,7 +135,7 @@ void SongSelectScene::selectRightSideSong()
     data.selectedSong.selectedSongId =  data.selectedSong.selectedSongData.id;
     m_frameCount = Scene::FrameCount();
     
-} // ここらへん動作確認する
+}
 
 void SongSelectScene::selectLeftSideSong()
 {
@@ -273,25 +292,20 @@ void SongSelectScene::drawImpl() const
         }
 
         Vec2 basePos(0, 0);
-        double text_x = 0;
         double baseMultipler = 2.0 / 3.0;
         if (render_index_i <= -1) {
             basePos = Vec2(-110 + 166.66666 * render_index_i, -90);
-            text_x = 203.33333 * render_index_i;
         }
         else if (-1 <= render_index_i && render_index_i < 0) {
             basePos = Vec2(-110 + 166.66666 * render_index_i, -165 - 75 * render_index_i);
             baseMultipler = - std::abs(render_index_i) / 3.0 + 1;
-            text_x = 203.33333 * render_index_i;
         }
         else if (0 <= render_index_i && render_index_i < 1) {
             basePos = Vec2(-110 + 240 * render_index_i, -165 + 75 * render_index_i);
             baseMultipler = - std::abs(render_index_i) / 3.0 + 1;
-            text_x = 203.33333 * render_index_i;
         }
         else {
             basePos = Vec2(-36.66666 + 166.66666 * render_index_i, -90);
-            text_x = 36.6666 + 166.6666 * render_index_i;
         }
 
         Color background_color;
@@ -315,17 +329,43 @@ void SongSelectScene::drawImpl() const
             color = Palette::White;
         }
     
+        const double card_x = center.x + ResponsiveValue(basePos.x);
+        const double card_y = center.y + ResponsiveValue(basePos.y);
+        const double card_width = ResponsiveValue(220 * baseMultipler);
+        const double card_height = ResponsiveValue(330 * baseMultipler);
+
         RoundRect{
-            center.x + ResponsiveValue(basePos.x), center.y + ResponsiveValue(basePos.y),
-            ResponsiveValue(220 * baseMultipler), ResponsiveValue(330 * baseMultipler),
+            card_x, card_y,
+            card_width, card_height,
             5
         }.draw(background_color);
+
+        const auto jacket_it = m_jacketTextures.find(song_data.id);
+        if (jacket_it != m_jacketTextures.end())
+        {
+            const double jacket_size = 150_sch * baseMultipler;
+            const double jacket_base_size = jacket_size + 12_sch * baseMultipler;
+            RoundRect{
+                card_x + card_width / 2 - jacket_base_size / 2,
+                card_y + 95_sch * baseMultipler - jacket_base_size / 2,
+                jacket_base_size,
+                jacket_base_size,
+                2_sch * baseMultipler
+            }.draw(Palette::White);
+            jacket_it->second.resized(jacket_size).draw(Arg::center(
+                card_x + card_width / 2,
+                card_y + 95_sch * baseMultipler
+            ));
+        }
+
         m_bodyFont(song_data.title).draw(
             24.0_sch * baseMultipler,
-            Arg::center(Vec2{
-                center.x + ResponsiveValue(text_x),
-                center.y + ResponsiveValue(-0.311111111 * basePos.y + 78.6666)
-            }),
+            Arg::center(card_x + card_width / 2, card_y + 205_sch * baseMultipler),
+            color
+        );
+        m_bodyFont(song_data.artist).draw(
+            18.0_sch * baseMultipler,
+            Arg::center(card_x + card_width / 2, card_y + 242_sch * baseMultipler),
             color
         );
 
