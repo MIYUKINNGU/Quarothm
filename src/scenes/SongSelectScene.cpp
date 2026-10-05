@@ -7,6 +7,10 @@ inline bool contains_vector(const std::vector<T>& vec, const T& value) {
 
 void SongSelectScene::initialize()
 {
+    m_settingsOpen = false;
+    m_settingsProgress = 0.0;
+    m_settingsSelection = 0;
+
     const JSON song_list_json = JSON::Load(U"assets/songs/songs_list.json");
 
 	if (not song_list_json)
@@ -62,6 +66,15 @@ void SongSelectScene::initialize()
     }
 
     auto& data = getData();
+
+    if (data.cache.contains(U"settings_note_speed")) {
+        data.settings.noteSpeed = data.cache[U"settings_note_speed"].get<float>();
+    }
+    if (data.cache.contains(U"settings_offset")) {
+        data.settings.offset = data.cache[U"settings_offset"].get<int32>();
+    }
+    data.cache[U"settings_note_speed"] = data.settings.noteSpeed;
+    data.cache[U"settings_offset"] = data.settings.offset;
 
     data.selectedSong = SongSelection{
         m_songRegistry[static_cast<unsigned long long>(data.cache[U"last_selected_song_id"].get<int32>())],
@@ -130,8 +143,58 @@ void SongSelectScene::selectLeftSideSong()
 
 void SongSelectScene::updateImpl()
 {
+    const bool settings_was_open = m_settingsOpen;
+    updateSettings();
+    if (settings_was_open || m_settingsOpen) return;
+
+    updateSongSelect();
+}
+
+void SongSelectScene::updateSettings()
+{
     auto& data = getData();
-    if (KeyEscape.down())
+    if (!m_settingsOpen) {
+        if (KeyEscape.down() || KeyZ.down() || KeyX.down()) {
+            m_settingsOpen = true;
+        }
+    }
+    else if (KeyJ.down() || KeyEscape.down() || KeyZ.down() || KeyX.down()) {
+        m_settingsOpen = false;
+    }
+    else if (KeyLeft.down() || KeyA.down()) {
+        m_settingsSelection = std::max(0, m_settingsSelection - 1);
+    }
+    else if (KeyRight.down() || KeyD.down()) {
+        m_settingsSelection = std::min(1, m_settingsSelection + 1);
+    }
+    else if (KeyUp.down() || KeyW.down()) {
+        if (m_settingsSelection == 0) {
+            data.settings.noteSpeed = std::min(10.0f, data.settings.noteSpeed + 0.1f);
+        }
+        else {
+            data.settings.offset = std::min<int32>(200, data.settings.offset + 1);
+        }
+    }
+    else if (KeyDown.down() || KeyS.down()) {
+        if (m_settingsSelection == 0) {
+            data.settings.noteSpeed = std::max(1.0f, data.settings.noteSpeed - 0.1f);
+        }
+        else {
+            data.settings.offset = std::max<int32>(-200, data.settings.offset - 1);
+        }
+    }
+
+    const double target = m_settingsOpen ? 1.0 : 0.0;
+    const double progress_step = std::min(1.0, static_cast<double>(ResponsiveValue(0, 0.55)));
+    m_settingsProgress += (target - m_settingsProgress) * progress_step;
+    data.cache[U"settings_note_speed"] = data.settings.noteSpeed;
+    data.cache[U"settings_offset"] = data.settings.offset;
+}
+
+void SongSelectScene::updateSongSelect()
+{
+    auto& data = getData();
+    if (KeyJ.down())
     {
         changeScene(SceneState::Title, 0.0s);
         return;
@@ -271,4 +334,62 @@ void SongSelectScene::drawImpl() const
 
     // +35 -> 0 -> +35
     // 220 -> 330 -> 220
+
+    if (m_settingsProgress > 0.0) {
+        const double settings_scale = 1.0 + (1.35 - 1.0) * (1.0 - m_settingsProgress);
+        const double settings_width = 640_sch * settings_scale;
+        const double settings_height = 420_sch * settings_scale;
+        const double settings_alpha = 1.0 * m_settingsProgress;
+        const Color settings_backdrop{ U"#000000" };
+        const Color settings_panel{ U"#464366" };
+        const Color settings_accent{ U"#9792ff" };
+
+        RectF{ 0_sch, 0_sch, Scene::Width(), Scene::Height() }.draw(ColorF{ settings_backdrop, 0.55 * m_settingsProgress });
+        RoundRect{
+            center.x - settings_width / 2,
+            center.y - settings_height / 2,
+            settings_width,
+            settings_height,
+            4_sch * settings_scale
+        }.draw(ColorF{ settings_panel, settings_alpha });
+        m_headingFont(U"設定").draw(30_sch * settings_scale, Arg::center(center.x, center.y - 138_sch * settings_scale), Color{ 222, 220, 255, settings_alpha * 255 });
+
+        const double item_top = center.y - 65_sch * settings_scale;
+        const double item_offset = 210_sch;
+        const double value_y = item_top + 54_sch * settings_scale;
+        // rgb(222, 222, 222)
+        const Color description_color{ 222, 222, 222, settings_alpha * 255 };
+        const ColorF selected_color{ settings_accent, settings_alpha };
+        const std::array<String, 2> item_names{ U"ノーツ速度", U"オフセット" };
+        const std::array<String, 2> item_descriptions{ U"ノーツが流れる速度", U"判定位置の調整（ms）" };
+        const std::array<String, 2> item_values{ Format(data.settings.noteSpeed), Format(data.settings.offset) };
+
+        for (int32 i = 0; i < 2; ++i) {
+            const double item_x = center.x + (-item_offset + item_offset * i) * settings_scale;
+            const bool selected = (m_settingsSelection == i);
+            // rgb(222, 220, 255)
+            const Color item_color{ 222, 220, 255, settings_alpha * 255 };
+            const double value_width = 150_sch * settings_scale;
+
+            m_bodyFont(item_names[i]).draw(22_sch * settings_scale, Arg::center(item_x, item_top), item_color);
+            m_bodyFont(item_values[i]).draw(38_sch * settings_scale, Arg::center(item_x, value_y + 8_sch), item_color);
+            m_bodyFont(item_descriptions[i]).draw(14_sch * settings_scale, Arg::center(item_x, value_y + 80_sch * settings_scale), description_color);
+
+            if (selected) {
+                const double underline_y = value_y + 30_sch * settings_scale;
+                const double arrow_x = item_x;
+                Line{ item_x - value_width / 2, underline_y, item_x + value_width / 2, underline_y }.draw(2_sch * settings_scale, selected_color);
+                Triangle{
+                    Vec2{ arrow_x, value_y - 30_sch * settings_scale },
+                    Vec2{ arrow_x - 9_sch * settings_scale, value_y - 16_sch * settings_scale },
+                    Vec2{ arrow_x + 9_sch * settings_scale, value_y - 16_sch * settings_scale }
+                }.draw(selected_color);
+                Triangle{
+                    Vec2{ arrow_x, underline_y + 30_sch * settings_scale },
+                    Vec2{ arrow_x - 9_sch * settings_scale, underline_y + 16_sch * settings_scale },
+                    Vec2{ arrow_x + 9_sch * settings_scale, underline_y + 16_sch * settings_scale }
+                }.draw(selected_color);
+            }
+        }
+    }
 }

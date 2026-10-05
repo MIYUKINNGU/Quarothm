@@ -3,5 +3,7 @@
     "last_selected_song_folder_id": 0,
     "last_selected_song_index": 0,
     "last_selected_difficulty": 1,
-    "unlocked_hidden_songs": []
+    "unlocked_hidden_songs": [],
+    "settings_note_speed": 2.0,
+    "settings_offset": 0
 }

@@ -11,6 +11,8 @@ public:
     using AbstractScene<SongSelectScene>::AbstractScene;
     void initialize();
     void updateImpl();
+    void updateSettings();
+    void updateSongSelect();
     void drawImpl() const;
     void store2Cache();
     void selectRightSideSong();
@@ -27,4 +29,7 @@ private:
     unsigned long long m_frameCount = 0;
     unsigned long long m_beforeFrameCount = 0;
     std::vector<unsigned long long> m_unlocked_hidden;
+    bool m_settingsOpen = false;
+    double m_settingsProgress = 0.0;
+    int32 m_settingsSelection = 0;
 };
