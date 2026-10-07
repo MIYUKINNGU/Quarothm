@@ -854,10 +854,7 @@ void PlayScene::updateImpl()
         else data.presentPlayData.accuracy = 100.0;
         if (KeyR.down() || !m_song_audio.isPlaying())
         {
-            if (data.presentPlayData.accuracy == 100.0) {
-                data.presentPlayData.clear = ClearType::MaxScore;
-            }
-            else if (data.presentPlayData.accuracy >= 70.0) {
+            if (data.presentPlayData.accuracy >= 70.0 && notesCount != 0) {
                 data.presentPlayData.clear = ClearType::Cleared;
                 if (maxNotesCount == data.presentPlayData.perfectplus) {
                     data.presentPlayData.clear = ClearType::MaxScore;

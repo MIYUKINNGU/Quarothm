@@ -52,7 +52,7 @@ void ResultScene::initialize()
 
 void ResultScene::updateImpl()
 {
-    if (KeyEnter.down()) changeScene(SceneState::SongSelect, 0.0s);
+    if (KeyEnter.down() || KeyJ.down()) changeScene(SceneState::SongSelect, 0.0s);
     else if (KeyEscape.down()) changeScene(SceneState::Title, 0.0s);
 }
 
@@ -65,6 +65,11 @@ void ResultScene::drawImpl() const
     double accuracy = data.presentPlayData.accuracy;
 
     long long diff = (long long)score-(long long)m_record_score;
+        Rect{
+        0, Scene::Height() - 25_sch,
+        Scene::Width(), 25_sch
+    }.draw(Palette::White);
+    m_bodyFont(U"①：戻る").draw(12.0_sch, Arg::bottomLeft(Vec2{ 13_sch, Scene::Height() - 4_sch }), Palette::Black);
 
     m_headingFont(U"RESULT").draw(24.0_sch, Vec2{ 26_sch, 15_sch }, Palette::White);
     switch (data.presentPlayData.clear) {
@@ -85,7 +90,6 @@ void ResultScene::drawImpl() const
             break;
     }
 
-    // TODO: クリアかの表示を追加
     m_bodyFont(U"{:09}"_fmt(score)).draw(30_sch, Arg::center(center.x, center.y - 145_sch));
     m_bodyFont(U"{:.2f}%"_fmt(accuracy)).draw(20_sch, Arg::rightCenter(center.x + 200_sch, center.y - 145_sch));
     m_bodyFont(U"High Score").draw(16_sch, Arg::leftCenter(center.x - 200_sch, center.y - 100_sch));

@@ -274,6 +274,11 @@ void SongSelectScene::drawImpl() const
     const auto& data = getData();
 
     m_bodyFont(U"楽曲選曲").draw(24.0_sch, Vec2{ 26_sch, 15_sch }, Palette::White);
+    Rect{
+        0, Scene::Height() - 25_sch,
+        Scene::Width(), 25_sch
+    }.draw(Palette::White);
+    m_bodyFont(U"←→：楽曲選択　↑↓：難易度選択　①：戻る　②：決定　+/-：設定").draw(12.0_sch, Arg::bottomLeft(Vec2{ 13_sch, Scene::Height() - 4_sch }), Palette::Black);
 
     double scroll_offset = 73.33333_sch;
     const SongsFolderSpecies selected_folder_species = data.selectedSong.selectedFolderSpecies;
@@ -331,6 +336,8 @@ void SongSelectScene::drawImpl() const
             background_color = Palette::Orangered;
             color = Palette::White;
         }
+
+        const Color outlineColor = Color{background_color.r * 0.8, background_color.g * 0.8, background_color.b * 0.8};
     
         const double card_x = center.x + ResponsiveValue(basePos.x);
         const double card_y = center.y + ResponsiveValue(basePos.y);
@@ -338,9 +345,14 @@ void SongSelectScene::drawImpl() const
         const double card_height = ResponsiveValue(330 * baseMultipler);
 
         RoundRect{
+            card_x - 3_sch, card_y - 3_sch,
+            card_width + 6_sch, card_height + 6_sch,
+            8_sch
+        }.draw(outlineColor);
+        RoundRect{
             card_x, card_y,
             card_width, card_height,
-            5
+            5_sch
         }.draw(background_color);
 
         const auto jacket_it = m_jacketTextures.find(song_data.id);

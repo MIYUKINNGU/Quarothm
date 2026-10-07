@@ -22,7 +22,7 @@ void TitleScene::updateImpl()
         return;
     }
 
-    if (KeyEnter.down())
+    if (KeyJ.down() | KeyK.down())
     {
         changeScene(SceneState::SongSelect, 0.0s);
     }
@@ -35,8 +35,16 @@ void TitleScene::updateImpl()
 
 void TitleScene::drawImpl() const
 {
-    m_titleFont(U"RHYTHM GAME").drawAt(Scene::Center().movedBy(0, -45), Palette::Aqua);
-    m_guideFont(U"Press Enter").drawAt(Scene::Center().movedBy(0, 45), Palette::White);
+    // "Qua"ttro "ro"tation rhy"thm" game -> Quarothm
+    m_titleFont(U"Quarothm").drawAt(Scene::Center().movedBy(0, -45), Palette::Aqua);
+    m_guideFont(U"Press ①/② Button").drawAt(Scene::Center().movedBy(0, 45), Palette::White);
+
+    // なんかチグハグ感あったので背景なし
+    // Rect{
+    //     0, Scene::Height() - 25_sch,
+    //     Scene::Width(), 25_sch
+    // }.draw(Palette::White);
+    m_guideFont(U"+/-：クレジット表記").draw(18.0_sch, Arg::bottomLeft(Vec2{ 13_sch, Scene::Height() - 4_sch }), Palette::White);
 
     if (m_creditsProgress > 0.0)
     {
