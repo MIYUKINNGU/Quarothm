@@ -403,9 +403,10 @@ void SongSelectScene::drawImpl() const
         // rgb(222, 222, 222)
         const Color description_color{ 222, 222, 222, settings_alpha * 255 };
         const ColorF selected_color{ settings_accent, settings_alpha };
+        const bool isNoteSpeedInteger = !Format(data.settings.noteSpeed).includes(U".");
         const std::array<String, 2> item_names{ U"ノーツ速度", U"オフセット" };
         const std::array<String, 2> item_descriptions{ U"ノーツが流れる速度", U"判定位置の調整（ms）" };
-        const std::array<String, 2> item_values{ Format(data.settings.noteSpeed), Format(data.settings.offset) };
+        const std::array<String, 2> item_values{ Format(data.settings.noteSpeed) + (isNoteSpeedInteger ? U".0" : U""), Format(data.settings.offset) };
 
         for (int32 i = 0; i < 2; ++i) {
             const double item_x = center.x + (-item_offset + item_offset * i) * settings_scale;
