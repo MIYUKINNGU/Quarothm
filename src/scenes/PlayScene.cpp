@@ -9,6 +9,23 @@ void PlayScene::initialize()
     m_state = State::Loading;
     m_elapsedMilliSec = 0.0;
 
+    const auto& song_data = getData().selectedSong.selectedSongData;
+    TextReader meta_reader{ CombinePath(song_data.songFilePath, U"meta") };
+    String audio_extension;
+    String jacket_extension;
+    if (meta_reader && meta_reader.readLine(audio_extension) && meta_reader.readLine(jacket_extension))
+    {
+        const String jacket_path = CombinePath(song_data.songFilePath, U"jacket." + jacket_extension);
+        if (FileSystem::Exists(jacket_path))
+        {
+            Texture jacket{ jacket_path };
+            if (not jacket.isEmpty())
+            {
+                m_loadingJacket = std::move(jacket);
+            }
+        }
+    }
+
     m_future = std::async(
         std::launch::async,
         [this](){
@@ -895,7 +912,41 @@ void PlayScene::drawImpl() const
 {
     if (m_state == State::Loading)
     {
-        m_font(U"NOW LOADING...").drawAt(Scene::Center(), Palette::White);
+        const auto& data = getData();
+        const Point center = Scene::Center();
+        const double jacket_size = 180_sch;
+        const double jacket_base_size = 196_sch;
+        const double jacket_center_y = center.y - 45_sch;
+        const double loading_section_height = Scene::Height() / 4.0;
+        const String chart_creator = [&]() {
+            switch (data.selectedSong.selectedDifficulty) {
+            case Difficulty::Easy:
+                return data.selectedSong.selectedSongData.chartCreatorEasy;
+            case Difficulty::Normal:
+                return data.selectedSong.selectedSongData.chartCreatorNormal;
+            case Difficulty::Expert:
+                return data.selectedSong.selectedSongData.chartCreatorExpert;
+            }
+            return String{};
+        }();
+
+        // 上下を1、中央を2とする領域の中央にローディング情報を配置します。
+        const double content_center_y = loading_section_height + loading_section_height;
+        const double content_offset_y = content_center_y - center.y;
+        const double image_center_y = jacket_center_y + content_offset_y;
+        RectF{
+            center.x - jacket_base_size / 2,
+            image_center_y - jacket_base_size / 2,
+            jacket_base_size,
+            jacket_base_size
+        }.draw(Palette::White);
+        if (not m_loadingJacket.isEmpty())
+        {
+            m_loadingJacket.resized(jacket_size).draw(Arg::center(center.x, image_center_y));
+        }
+
+        m_font(data.selectedSong.selectedSongData.artist).draw(20_sch, Arg::center(center.x, image_center_y + 120_sch), Palette::White);
+        m_font(U"譜面制作: " + chart_creator).draw(16_sch, Arg::center(center.x, image_center_y + 150_sch), Palette::White);
         return;
     }
 

@@ -31,7 +31,10 @@ void SongSelectScene::initialize()
             object[U"title"].getString(),
             object[U"artist"].getString(),
             object[U"path"].getString(),
-            additional_labels
+            additional_labels,
+            object.contains(U"chart_creator_easy") ? object[U"chart_creator_easy"].getString() : U"",
+            object.contains(U"chart_creator_normal") ? object[U"chart_creator_normal"].getString() : U"",
+            object.contains(U"chart_creator_expert") ? object[U"chart_creator_expert"].getString() : U""
         };
         m_songRegistry[song_id] = song_data;
     }

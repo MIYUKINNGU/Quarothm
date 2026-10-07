@@ -56,6 +56,7 @@ private:
     const Font m_font{ FontMethod::MSDF, 22 };
     mutable EcsWorld m_world;
     std::future<void> m_future;
+    Texture m_loadingJacket;
     State m_state = State::Loading;
     double m_elapsedMilliSec = 0.0;
     JudgementType m_recentJudgement = JudgementType::None;

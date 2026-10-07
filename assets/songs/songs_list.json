@@ -4,34 +4,49 @@
         "title": "M1LLI0N PP",
         "artist": "Camellia",
         "path": "assets/songs/M1LLI0N_PP",
-        "additional_labels": ["default_hidden", "only_expert"]
+        "additional_labels": ["default_hidden", "only_expert"],
+        "chart_creator_easy": "",
+        "chart_creator_normal": "",
+        "chart_creator_expert": "MIYUKINNGU"
     },
     {
         "id": 2,
         "title": "Sample2 Song",
         "artist": "Various Artists",
         "path": "assets/songs/sample_song",
-        "additional_labels": []
+        "additional_labels": [],
+        "chart_creator_easy": "",
+        "chart_creator_normal": "",
+        "chart_creator_expert": ""
     },
     {
         "id": 3,
         "title": "Sample3 Song",
         "artist": "Various Artists",
         "path": "assets/songs/sample_song",
-        "additional_labels": []
+        "additional_labels": [],
+        "chart_creator_easy": "",
+        "chart_creator_normal": "",
+        "chart_creator_expert": ""
     },
     {
         "id": 4,
         "title": "Sample4 Song",
         "artist": "Various Artists",
         "path": "assets/songs/sample_song",
-        "additional_labels": []
+        "additional_labels": [],
+        "chart_creator_easy": "",
+        "chart_creator_normal": "",
+        "chart_creator_expert": ""
     },
     {
         "id": 5,
         "title": "Sample5 Song",
         "artist": "Various Artists",
         "path": "assets/songs/sample_song",
-        "additional_labels": []
+        "additional_labels": [],
+        "chart_creator_easy": "",
+        "chart_creator_normal": "",
+        "chart_creator_expert": ""
     }
 ]
