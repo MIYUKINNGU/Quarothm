@@ -2,7 +2,6 @@
 
 void ResultScene::initialize()
 {
-    // リザルト表示用の集計・演出の初期化をここへ追加します。
     auto& data = getData();
     unsigned long long id = data.selectedSong.selectedSongId;
     if (data.scoreRecords.find(id) != data.scoreRecords.end()) {
@@ -105,6 +104,4 @@ void ResultScene::drawImpl() const
     m_bodyFont(U"{}"_fmt(data.presentPlayData.good)).draw(16_sch, Arg::rightCenter(center.x + 75_sch, center.y + 34_sch));
     m_bodyFont(U"Miss").draw(TextStyle::Outline(0.1_sch, Palette::White), 16_sch, Arg::leftCenter(center.x - 75_sch, center.y + 68_sch), Palette::Red);
     m_bodyFont(U"{}"_fmt(data.presentPlayData.miss)).draw(16_sch, Arg::rightCenter(center.x + 75_sch, center.y + 68_sch));
-
-    m_bodyFont(U"Enter: Song Select    Esc: Title").draw(26_sch, Arg::center(center.x, center.y + 120_sch));
 }

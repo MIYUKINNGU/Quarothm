@@ -711,7 +711,6 @@ void PlayScene::updateImpl()
 
     case State::Playing: {
         m_elapsedMilliSec = m_song_audio.posSec() * 1000;
-        // NoteMoveSystem相当: Noteを持つEntityの位置を一括更新します。
         m_world.each<TransformComponent>([this, data](const Entity note, TransformComponent& transform)
         {
             NoteComponent* note_component = *m_world.getComponent<NoteComponent*>(note);
@@ -949,7 +948,6 @@ void PlayScene::drawImpl() const
             return String{};
         }();
 
-        // 上下を1、中央を2とする領域の中央にローディング情報を配置します。
         const double content_center_y = loading_section_height + loading_section_height;
         const double content_offset_y = content_center_y - center.y;
         const double image_center_y = jacket_center_y + content_offset_y;
@@ -1151,7 +1149,6 @@ void PlayScene::drawImpl() const
     if (combo >= 2) {
         m_font(Format(combo)).draw(12_sch, Arg::center(center + Vec2(0, 18_sch)), Palette::White);
     }
-    m_font((m_state == State::Finished) ? U"FINISHED" : U"PLAY  R: Finish").draw(20, 20);
     m_font(U"{:09}"_fmt(data.presentPlayData.score)).draw(Arg::topRight(Vec2(Scene::Width() - 20, 20)), Palette::White);
     m_font(U"{:.2f}%"_fmt(data.presentPlayData.accuracy)).draw(Arg::topRight(Vec2(Scene::Width() - 20, 42)), Palette::White);
 }
