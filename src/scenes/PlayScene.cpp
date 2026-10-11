@@ -8,6 +8,7 @@ void PlayScene::initialize()
 {
     m_state = State::Loading;
     m_elapsedMilliSec = 0.0;
+    m_loadingVisualProgress = 0.0;
 
     const auto& song_data = getData().selectedSong.selectedSongData;
     TextReader meta_reader{ CombinePath(song_data.songFilePath, U"meta") };
@@ -32,6 +33,22 @@ void PlayScene::initialize()
             beginPlaying();
         }
     );
+}
+
+void PlayScene::updateFadeInImpl(double)
+{
+    if (m_state == State::Loading)
+    {
+        m_loadingVisualProgress = std::min(1.0, m_loadingVisualProgress + static_cast<double>(ResponsiveValue(0, 0.18)));
+    }
+}
+
+void PlayScene::updateFadeOutImpl(double)
+{
+    if (m_state == State::Loading)
+    {
+        m_loadingVisualProgress = std::min(1.0, m_loadingVisualProgress + static_cast<double>(ResponsiveValue(0, 0.18)));
+    }
 }
 
 void PlayScene::beginPlaying()
@@ -690,7 +707,6 @@ void PlayScene::updateImpl()
     switch (m_state)
     {
     case State::Loading:
-        // 非同期で状態更新もしてるのですることがない
         break;
 
     case State::Playing: {
@@ -900,7 +916,7 @@ void PlayScene::updateImpl()
         break;
     }
     case State::Finished:
-        changeScene(SceneState::Result, 0.25s);
+        changeScene(SceneState::Result, 0.3s);
         break;
     }
 }
@@ -911,9 +927,15 @@ void PlayScene::drawImpl() const
     {
         const auto& data = getData();
         const Point center = Scene::Center();
-        const double jacket_size = 180_sch;
-        const double jacket_base_size = 196_sch;
-        const double jacket_center_y = center.y - 45_sch;
+        const double jacket_start_size = 230_sch;
+        const double jacket_end_size = 180_sch;
+        const double jacket_size = jacket_start_size + (jacket_end_size - jacket_start_size) * m_loadingVisualProgress;
+        const double jacket_base_padding = 16_sch;
+        const double jacket_base_size = jacket_size + jacket_base_padding;
+        const double jacket_center_y_offset = -45_sch;
+        const double jacket_center_y = center.y + jacket_center_y_offset;
+        const double text_fade_start = 0.55;
+        const double text_alpha = std::clamp((m_loadingVisualProgress - text_fade_start) / (1.0 - text_fade_start), 0.0, 1.0);
         const double loading_section_height = Scene::Height() / 4.0;
         const String chart_creator = [&]() {
             switch (data.selectedSong.selectedDifficulty) {
@@ -942,8 +964,8 @@ void PlayScene::drawImpl() const
             m_loadingJacket.resized(jacket_size).draw(Arg::center(center.x, image_center_y));
         }
 
-        m_font(data.selectedSong.selectedSongData.artist).draw(20_sch, Arg::center(center.x, image_center_y + 120_sch), Palette::White);
-        m_font(U"譜面制作: " + chart_creator).draw(16_sch, Arg::center(center.x, image_center_y + 150_sch), Palette::White);
+        m_font(data.selectedSong.selectedSongData.artist).draw(20_sch, Arg::center(center.x, image_center_y + jacket_size / 2 + 30_sch), ColorF{ Palette::White, text_alpha });
+        m_font(U"譜面制作: " + chart_creator).draw(16_sch, Arg::center(center.x, image_center_y + jacket_size / 2 + 60_sch), ColorF{ Palette::White, text_alpha });
         return;
     }
 

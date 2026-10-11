@@ -218,7 +218,7 @@ void SongSelectScene::updateSongSelect()
     auto& data = getData();
     if (KeyJ.down())
     {
-        changeScene(SceneState::Title, 0.0s);
+        changeScene(SceneState::Title, 0.3s);
         return;
     }
     if (KeyLeft.down() || KeyA.down())
@@ -258,7 +258,7 @@ void SongSelectScene::updateSongSelect()
             data.selectedSong.selectedDifficulty = Difficulty::Expert;
         }
         store2Cache();
-        changeScene(SceneState::Play, 0.0s);
+        changeScene(SceneState::Play, 0.3s);
     }
 
     if (m_beforeFrameCount != Scene::FrameCount()) {

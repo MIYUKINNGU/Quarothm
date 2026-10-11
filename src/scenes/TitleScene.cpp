@@ -1,5 +1,10 @@
 #include "TitleScene.hpp"
 
+// やることメモ
+// 4. チュートリアル楽曲(ただのメトロノーム)を作成(ラベルにtutorialって入れとく)
+//   - tutorialのときはテキスト表示関係のjsonを追加する
+// 5. 自己べ情報を乗せるか考えて乗せるなら追加する+楽曲タイトルの部分だけ背景色白でちょっとデザイン頑張る
+
 void TitleScene::initialize()
 {
     m_creditsOpen = false;
@@ -24,7 +29,7 @@ void TitleScene::updateImpl()
 
     if (KeyJ.down() | KeyK.down())
     {
-        changeScene(SceneState::SongSelect, 0.0s);
+        changeScene(SceneState::SongSelect, 0.3s);
     }
     
     if (KeyEscape.down())

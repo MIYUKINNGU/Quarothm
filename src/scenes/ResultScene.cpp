@@ -52,8 +52,8 @@ void ResultScene::initialize()
 
 void ResultScene::updateImpl()
 {
-    if (KeyEnter.down() || KeyJ.down()) changeScene(SceneState::SongSelect, 0.0s);
-    else if (KeyEscape.down()) changeScene(SceneState::Title, 0.0s);
+    if (KeyEnter.down() || KeyJ.down()) changeScene(SceneState::SongSelect, 0.3s);
+    else if (KeyEscape.down()) changeScene(SceneState::Title, 0.3s);
 }
 
 void ResultScene::drawImpl() const

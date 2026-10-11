@@ -23,6 +23,8 @@ public:
     using AbstractScene<PlayScene>::AbstractScene;
     void initialize();
     void updateImpl();
+    void updateFadeInImpl(double t);
+    void updateFadeOutImpl(double t);
     void drawImpl() const;
 
 private:
@@ -57,6 +59,7 @@ private:
     mutable EcsWorld m_world;
     std::future<void> m_future;
     Texture m_loadingJacket;
+    double m_loadingVisualProgress = 0.0;
     State m_state = State::Loading;
     double m_elapsedMilliSec = 0.0;
     JudgementType m_recentJudgement = JudgementType::None;

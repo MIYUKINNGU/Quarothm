@@ -22,6 +22,8 @@ struct GameData
     ScoreRecorder presentPlayData = ScoreRecorder{};
     JSON cache = JSON();
     SettingsStorage settings = SettingsStorage{};
+    // FadeOut の計測値を、シーンの型に依存せず次のシーンへ共有します。
+    double fadeDuration = 0.0;
 };
 
 using App = SceneManager<SceneState, GameData>;
