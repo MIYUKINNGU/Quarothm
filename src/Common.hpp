@@ -48,3 +48,8 @@ inline void DebugWarning(const String& message) {
     Console << U"Warning: " << message;
 #endif
 }
+
+template <typename T>
+inline bool contains_vector(const std::vector<T>& vec, const T& value) {
+    return std::find(vec.begin(), vec.end(), value) != vec.end();
+}

@@ -1,10 +1,5 @@
 #include "SongSelectScene.hpp"
 
-template <typename T>
-inline bool contains_vector(const std::vector<T>& vec, const T& value) {
-    return std::find(vec.begin(), vec.end(), value) != vec.end();
-}
-
 void SongSelectScene::initialize()
 {
     m_settingsOpen = false;
@@ -257,6 +252,12 @@ void SongSelectScene::updateSongSelect()
         if (contains_vector<String>(additional_labels, U"only_expert") && data.selectedSong.selectedDifficulty != Difficulty::Expert) {
             data.selectedSong.selectedDifficulty = Difficulty::Expert;
         }
+        else if (contains_vector<String>(additional_labels, U"only_normal") && data.selectedSong.selectedDifficulty != Difficulty::Normal) {
+            data.selectedSong.selectedDifficulty = Difficulty::Normal;
+        }
+        else if (contains_vector<String>(additional_labels, U"only_easy") && data.selectedSong.selectedDifficulty != Difficulty::Easy) {
+            data.selectedSong.selectedDifficulty = Difficulty::Easy;
+        }
         store2Cache();
         changeScene(SceneState::Play, 0.3s);
     }
@@ -335,6 +336,14 @@ void SongSelectScene::drawImpl() const
         if (contains_vector<String>(song_data.additionalLabels, U"only_expert")) {
             background_color = Palette::Orangered;
             color = Palette::White;
+        }
+        else if (contains_vector<String>(song_data.additionalLabels, U"only_normal")) {
+            background_color = Palette::Lightgreen;
+            color = Palette::Black;
+        }
+        else if (contains_vector<String>(song_data.additionalLabels, U"only_easy")) {
+            background_color = Palette::Lightskyblue;
+            color = Palette::Black;
         }
 
         const Color outlineColor = Color{background_color.r * 0.8, background_color.g * 0.8, background_color.b * 0.8};

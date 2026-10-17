@@ -73,6 +73,14 @@ void PlayScene::beginPlaying()
         ThrowError(U"Failed to load.", U"Failed to open `" + CombinePath(songDir, U"song." + audio_type) + U"`.");
     }
 
+    if (contains_vector<String>(data.selectedSong.selectedSongData.additionalLabels, U"use_text")) {
+        use_text = true;
+        if (!FileSystem::Exists(CombinePath(songDir, U"text_data.json"))) {
+            ThrowError(U"Failed to load.", U"Failed to open `" + CombinePath(songDir, U"text_data.json") + U"`.");
+        }
+        text_json_data = JSON::Load(CombinePath(songDir, U"text_data.json"));
+    }
+
     TextReader chart_reader{ CombinePath(songDir, Format(static_cast<int32>(data.selectedSong.selectedDifficulty)) + U".sus") };
 
     String op;
@@ -828,14 +836,15 @@ void PlayScene::updateImpl()
             m_frameCount = Scene::FrameCount();
         }
 
-        const auto process_lane_notes = [this](std::vector<NoteComponent*>& lane) {
+        const double timing_offset = m_chartData.chartOffset + data.settings.offset;
+        const auto process_lane_notes = [this, timing_offset](std::vector<NoteComponent*>& lane) {
             const auto note_it = std::find_if(lane.begin(), lane.end(), [](NoteComponent* note_component) {
                 return !note_component->judged && note_component->noteType != NoteType::Hold;
             });
             if (note_it != lane.end()) {
                 NoteComponent* note_component = *note_it;
                 size_t note_idx = std::distance(lane.begin(), note_it);
-                if (m_elapsedMilliSec - note_component->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
+                if (m_elapsedMilliSec - note_component->hitTimeMilliSec - timing_offset > 150.0) {
                     processNoteMiss(note_component, note_idx);
                 }
             }
@@ -846,10 +855,10 @@ void PlayScene::updateImpl()
             if (hold_note_it != lane.end()) {
                 NoteComponent* hold_note = *hold_note_it;
                 size_t hold_note_idx = std::distance(lane.begin(), hold_note_it);
-                if (!starting_point_tapped && m_elapsedMilliSec - hold_note->hitTimeMilliSec - m_chartData.chartOffset > 150.0) {
+                if (!starting_point_tapped && m_elapsedMilliSec - hold_note->hitTimeMilliSec - timing_offset > 150.0) {
                     processNoteMiss(hold_note, hold_note_idx);
                 }
-                else if (starting_point_tapped && m_elapsedMilliSec - hold_note->hitTimeMilliSec - hold_note->holdLength - m_chartData.chartOffset > 0.0) {
+                else if (starting_point_tapped && m_elapsedMilliSec - hold_note->hitTimeMilliSec - hold_note->holdLength - timing_offset > 0.0) {
                     m_recentJudgement = JudgementType::PerfectPlus;
                     processNormalJudged(hold_note, hold_note_idx);
                     starting_point_tapped = false;
@@ -969,7 +978,140 @@ void PlayScene::drawImpl() const
 
     auto& data = getData();
 
+
+    /*
+    structure of text_json_data
+    [
+        {
+            "show_time": number, // seconds
+            "length": number, // seconds
+            "fade_in": boolean, // fade in over 0.4 seconds when true
+            "fade_out": boolean, // fade out over 0.4 seconds when true
+            "objects": [ // draw in order from index 0
+                {
+                    "type": "text" | "image",
+                    "data": string, // when "type" is "text", it's plain text, and when that's "image", it's relative path to an image data. (based on the game's current directory)
+                    "position_type": "relative" | "absolute", // when this is "relative", use _sch value for position and size.
+                    "pos": {
+                        "x": number,
+                        "y": number
+                    },
+                    "size": number, // text font size. For images, specify { "width": number, "height": number }.
+                    "anchor_type": "righttop" | "centertop" | "lefttop" | "rightcenter" | "center" | ..., // naming rule: horizontal -> vertical. but "center", not "centercenter"
+                    "base_position_type": "righttop" | "centertop" | "lefttop" | "rightcenter" | "center" | ..., // this rule is same as above
+                },
+                ...
+            ]
+        },
+        ...
+    ]
+    */
+
     Point center = Scene::Center();
+
+    if (use_text && text_json_data.isArray())
+    {
+        const auto getAnchorPosition = [](const String& anchor) {
+            const double width = Scene::Width();
+            const double height = Scene::Height();
+            if (anchor == U"righttop") return Vec2{ width, 0.0 };
+            if (anchor == U"centertop") return Vec2{ width / 2.0, 0.0 };
+            if (anchor == U"lefttop") return Vec2{ 0.0, 0.0 };
+            if (anchor == U"rightcenter") return Vec2{ width, height / 2.0 };
+            if (anchor == U"leftcenter") return Vec2{ 0.0, height / 2.0 };
+            if (anchor == U"rightbottom") return Vec2{ width, height };
+            if (anchor == U"centerbottom") return Vec2{ width / 2.0, height };
+            if (anchor == U"leftbottom") return Vec2{ 0.0, height };
+            return Scene::CenterF();
+        };
+
+        for (const auto& [index, text_data] : text_json_data)
+        {
+            const double show_time = text_data[U"show_time"].get<double>();
+            const double length = text_data[U"length"].get<double>();
+            // Text timing follows the chart timeline, so apply both the chart
+            // offset and the user offset (settings.offset is in milliseconds).
+            const double current_time = (m_elapsedMilliSec - m_chartData.chartOffset - data.settings.offset) / 1000.0;
+            if ((current_time < show_time) || (show_time + length < current_time))
+            {
+                continue;
+            }
+
+            constexpr double text_fade_duration = 0.4;
+            const bool fade_in = text_data[U"fade_in"].getOr<bool>(false);
+            const bool fade_out = text_data[U"fade_out"].getOr<bool>(false);
+            double text_alpha = 1.0;
+            if (fade_in)
+            {
+                text_alpha = Min(text_alpha, Clamp((current_time - show_time) / text_fade_duration, 0.0, 1.0));
+            }
+            if (fade_out)
+            {
+                text_alpha = Min(text_alpha, Clamp((show_time + length - current_time) / text_fade_duration, 0.0, 1.0));
+            }
+            const ColorF text_color{ Palette::White, text_alpha };
+
+            for (const auto& [object_index, object] : text_data[U"objects"])
+            {
+                const String object_type = object[U"type"].getString();
+                const String object_data = object[U"data"].getString();
+                const String position_type = object[U"position_type"].getOr<String>(U"absolute");
+                const auto& position_data = object[U"pos"];
+                const String base_position_type = object[U"base_position_type"].getString();
+                const Vec2 base_position = getAnchorPosition(base_position_type);
+                const double x = position_data[U"x"].get<double>();
+                const double y = position_data[U"y"].get<double>();
+                const double position_x = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(x)) : x;
+                const double position_y = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(y)) : y;
+                const Vec2 position = base_position + Vec2{
+                    position_x,
+                    position_y
+                };
+                const String anchor = object[U"anchor_type"].getString();
+
+                if (object_type == U"text")
+                {
+                    const double size = object[U"size"].getOr<double>(22.0);
+                    const double font_size = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(size)) : size;
+                    if (anchor == U"righttop") m_font(object_data).draw(font_size, Arg::topRight(position), text_color);
+                    else if (anchor == U"centertop") m_font(object_data).draw(font_size, Arg::topCenter(position), text_color);
+                    else if (anchor == U"lefttop") m_font(object_data).draw(font_size, Arg::topLeft(position), text_color);
+                    else if (anchor == U"rightcenter") m_font(object_data).draw(font_size, Arg::rightCenter(position), text_color);
+                    else if (anchor == U"leftcenter") m_font(object_data).draw(font_size, Arg::leftCenter(position), text_color);
+                    else if (anchor == U"rightbottom") m_font(object_data).draw(font_size, Arg::bottomRight(position), text_color);
+                    else if (anchor == U"centerbottom") m_font(object_data).draw(font_size, Arg::bottomCenter(position), text_color);
+                    else if (anchor == U"leftbottom") m_font(object_data).draw(font_size, Arg::bottomLeft(position), text_color);
+                    else m_font(object_data).draw(font_size, Arg::center(position), text_color);
+                }
+                else if (object_type == U"image")
+                {
+                    auto image_it = m_textTextures.find(object_data);
+                    if (image_it == m_textTextures.end())
+                    {
+                        image_it = m_textTextures.emplace(object_data, Texture{ object_data }).first;
+                    }
+                    if (not image_it->second.isEmpty())
+                    {
+                        const auto& size_data = object[U"size"];
+                        const double width = size_data[U"width"].getOr<double>(image_it->second.width());
+                        const double height = size_data[U"height"].getOr<double>(image_it->second.height());
+                        const double image_width = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(width, true)) : width;
+                        const double image_height = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(height)) : height;
+                        const auto image = image_it->second.resized(image_width, image_height);
+                        if (anchor == U"righttop") image.draw(Arg::topRight(position), text_color);
+                        else if (anchor == U"centertop") image.draw(Arg::topCenter(position), text_color);
+                        else if (anchor == U"lefttop") image.draw(Arg::topLeft(position), text_color);
+                        else if (anchor == U"rightcenter") image.draw(Arg::rightCenter(position), text_color);
+                        else if (anchor == U"leftcenter") image.draw(Arg::leftCenter(position), text_color);
+                        else if (anchor == U"rightbottom") image.draw(Arg::bottomRight(position), text_color);
+                        else if (anchor == U"centerbottom") image.draw(Arg::bottomCenter(position), text_color);
+                        else if (anchor == U"leftbottom") image.draw(Arg::bottomLeft(position), text_color);
+                        else image.draw(Arg::center(position), text_color);
+                    }
+                }
+            }
+        }
+    }
 
     Line{
         center.x, 0,

@@ -1,0 +1,389 @@
+[
+    {
+        "show_time": 1.00,
+        "length": 60.00,
+        "fade_in": true,
+        "fade_out": false,
+        "objects": [
+            {
+                "type": "image",
+                "data": "assets/images/UI/basecolor.png",
+                "position_type": "relative",
+                "pos": {
+                    "x": 50,
+                    "y": 50
+                },
+                "size": {
+                    "width": 300,
+                    "height": 200
+                },
+                "anchor_type": "lefttop",
+                "base_position_type": "lefttop"
+            }
+        ]
+    },
+    {
+        "show_time": 1.00,
+        "length": 3.00,
+        "fade_in": true,
+        "fade_out": true,
+        "objects": [
+            {
+                "type": "text",
+                "data": "Quarothmの世界へようこそ！",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 150
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            }
+        ]
+    },
+    {
+        "show_time": 4.00,
+        "length": 3.00,
+        "fade_in": true,
+        "fade_out": true,
+        "objects": [
+            {
+                "type": "text",
+                "data": "ここではこのゲームの",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 116
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "遊び方を説明するよ！",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 183
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            }
+        ]
+    },
+    {
+        "show_time": 7.00,
+        "length": 11.00,
+        "fade_in": true,
+        "fade_out": true,
+        "objects": [
+            {
+                "type": "text",
+                "data": "まずはタップノーツ",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 100
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "が来たらタイミング良く",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 150
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "①や②を押そう！",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 200
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            }
+        ]
+    },
+    {
+        "show_time": 19.00,
+        "length": 9.00,
+        "fade_in": true,
+        "fade_out": true,
+        "objects": [
+            {
+                "type": "text",
+                "data": "つぎは同時押しノーツ",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 100
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "が来たらタイミング良く",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 150
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "①と②を同時に押そう！",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 200
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            }
+        ]
+    },
+    {
+        "show_time": 29.00,
+        "length": 9.00,
+        "fade_in": true,
+        "fade_out": true,
+        "objects": [
+            {
+                "type": "text",
+                "data": "今度はフリックノーツ",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 90
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "下みたいな矢印が来たら",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 130
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "その方向に十字ボタンを押そう！",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 170
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "image",
+                "data": "assets/images/notes/left_normal.png",
+                "position_type": "relative",
+                "pos": {
+                    "x": 110,
+                    "y": 210
+                },
+                "size": {
+                    "width": 40.0,
+                    "height": 40.0
+                },
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "image",
+                "data": "assets/images/notes/up_normal.png",
+                "position_type": "relative",
+                "pos": {
+                    "x": 170,
+                    "y": 210
+                },
+                "size": {
+                    "width": 40.0,
+                    "height": 40.0
+                },
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "image",
+                "data": "assets/images/notes/right_normal.png",
+                "position_type": "relative",
+                "pos": {
+                    "x": 230,
+                    "y": 210
+                },
+                "size": {
+                    "width": 40.0,
+                    "height": 40.0
+                },
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "image",
+                "data": "assets/images/notes/down_normal.png",
+                "position_type": "relative",
+                "pos": {
+                    "x": 290,
+                    "y": 210
+                },
+                "size": {
+                    "width": 40.0,
+                    "height": 40.0
+                },
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            }
+        ]
+    },
+    {
+        "show_time": 39.00,
+        "length": 9.00,
+        "fade_in": true,
+        "fade_out": true,
+        "objects": [
+            {
+                "type": "text",
+                "data": "そして、ドラッグノーツ",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 100
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "はタイミングよく押さなくても",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 150
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "すでに①か②が押されていればOK！",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 200
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            }
+        ]
+    },
+    {
+        "show_time": 49.00,
+        "length": 7.00,
+        "fade_in": true,
+        "fade_out": true,
+        "objects": [
+            {
+                "type": "text",
+                "data": "最後はホールドノーツ",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 100
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "長いノーツが来ている間は",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 150
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "①か②を押しつづけよう！",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 200
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            }
+        ]
+    },
+    {
+        "show_time": 56.00,
+        "length": 3.00,
+        "fade_in": true,
+        "fade_out": true,
+        "objects": [
+            {
+                "type": "text",
+                "data": "これでチュートリアルは終わり",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 116
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
+                "type": "text",
+                "data": "選曲画面で曲を選んで楽しもう！",
+                "position_type": "relative",
+                "pos": {
+                    "x": 200,
+                    "y": 183
+                },
+                "size": 16,
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            }
+        ]
+    }
+]

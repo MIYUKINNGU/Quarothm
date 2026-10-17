@@ -1,5 +1,15 @@
 [
     {
+        "id": 0,
+        "title": "Tutorial",
+        "artist": "",
+        "path": "assets/songs/tutorial",
+        "additional_labels": ["use_text", "only_normal"],
+        "chart_creator_easy": "",
+        "chart_creator_normal": "",
+        "chart_creator_expert": ""
+    },
+    {
         "id": 1,
         "title": "M1LLI0N PP",
         "artist": "Camellia",

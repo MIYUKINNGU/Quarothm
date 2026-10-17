@@ -81,4 +81,7 @@ private:
     int32 m_judgeFrameCount = 0;
     unsigned int combo = 0;
     unsigned int maxNotesCount = 0;
+    bool use_text = false;
+    JSON text_json_data;
+    mutable std::unordered_map<String, Texture> m_textTextures;
 };
