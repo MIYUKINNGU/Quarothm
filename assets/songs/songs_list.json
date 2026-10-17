@@ -11,13 +11,13 @@
     },
     {
         "id": 2,
-        "title": "Sample2 Song",
-        "artist": "Various Artists",
-        "path": "assets/songs/sample_song",
+        "title": "Calamity Fortune",
+        "artist": "LeaF",
+        "path": "assets/songs/Calamity_Fortune",
         "additional_labels": [],
         "chart_creator_easy": "",
         "chart_creator_normal": "",
-        "chart_creator_expert": ""
+        "chart_creator_expert": "asta"
     },
     {
         "id": 3,
