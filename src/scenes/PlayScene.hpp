@@ -10,6 +10,7 @@
 #include <thread>
 #include <chrono>
 #include <future>
+#include <numbers>
 
 // DirectXのSALがGCC16のregex干渉している　←うんち
 #ifdef __GLIBCXX__

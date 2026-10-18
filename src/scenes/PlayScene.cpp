@@ -316,10 +316,10 @@ void PlayScene::beginPlaying()
     bool holding_note_up = false;
     bool holding_note_right = false;
     bool holding_note_down = false;
-    NoteComponent* starting_note_left;
-    NoteComponent* starting_note_up;
-    NoteComponent* starting_note_right;
-    NoteComponent* starting_note_down;
+    NoteComponent* starting_note_left = nullptr;
+    NoteComponent* starting_note_up = nullptr;
+    NoteComponent* starting_note_right = nullptr;
+    NoteComponent* starting_note_down = nullptr;
     // こういうのは上手くポインタをやりくりすることで同じ部分を一つにまとめれたりする
     // 若干頭使う必要あるのであとで(このコメント残ってたら変えてない)
     for (int32 i = 0; i <= measure_max; i++) {
@@ -342,6 +342,8 @@ void PlayScene::beginPlaying()
 
                 if (note_type == NoteType::Hold && holding_note_left) {
                     holding_note_left = false;
+
+					if (starting_note_left == nullptr) ThrowError(U"Invalid access detected.", U"At starting_note_left.");
 
                     starting_note_left->holdLength = current_time + divider * j - starting_note_left->hitTimeMilliSec;
                 }
@@ -381,6 +383,8 @@ void PlayScene::beginPlaying()
                 if (note_type == NoteType::Hold && holding_note_up) {
                     holding_note_up = false;
 
+					if (starting_note_up == nullptr) ThrowError(U"Invalid access detected.", U"At starting_note_up.");
+
                     starting_note_up->holdLength = current_time + divider * j - starting_note_up->hitTimeMilliSec;
                 }
                 else if (note_type == NoteType::Hold) {
@@ -418,6 +422,8 @@ void PlayScene::beginPlaying()
                 if (note_type == NoteType::Hold && holding_note_right) {
                     holding_note_right = false;
 
+					if (starting_note_right == nullptr) ThrowError(U"Invalid access detected.", U"At starting_note_right.");
+
                     starting_note_right->holdLength = current_time + divider * j - starting_note_right->hitTimeMilliSec;
                 }
                 else if (note_type == NoteType::Hold) {
@@ -454,6 +460,8 @@ void PlayScene::beginPlaying()
 
                 if (note_type == NoteType::Hold && holding_note_down) {
                     holding_note_down = false;
+
+					if (starting_note_down == nullptr) ThrowError(U"Invalid access detected.", U"At starting_note_down.");
 
                     starting_note_down->holdLength = current_time + divider * j - starting_note_down->hitTimeMilliSec;
                 }

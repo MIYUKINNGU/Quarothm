@@ -275,10 +275,10 @@ void SongSelectScene::drawImpl() const
     const auto& data = getData();
 
     m_bodyFont(U"楽曲選曲").draw(24.0_sch, Vec2{ 26_sch, 15_sch }, Palette::White);
-    Rect{
+    Rect(
         0, Scene::Height() - 25_sch,
         Scene::Width(), 25_sch
-    }.draw(Palette::White);
+    ).draw(Palette::White);
     m_bodyFont(U"←→：楽曲選択　↑↓：難易度選択　①：戻る　②：決定　+/-：設定").draw(12.0_sch, Arg::bottomLeft(Vec2{ 13_sch, Scene::Height() - 4_sch }), Palette::Black);
 
     double scroll_offset = 73.33333_sch;
@@ -346,7 +346,7 @@ void SongSelectScene::drawImpl() const
             color = Palette::Black;
         }
 
-        const Color outlineColor = Color{background_color.r * 0.8, background_color.g * 0.8, background_color.b * 0.8};
+        const Color outlineColor = Color(background_color.r * 0.8, background_color.g * 0.8, background_color.b * 0.8);
     
         const double card_x = center.x + ResponsiveValue(basePos.x);
         const double card_y = center.y + ResponsiveValue(basePos.y);
@@ -408,7 +408,7 @@ void SongSelectScene::drawImpl() const
         const Color settings_panel{ U"#464366" };
         const Color settings_accent{ U"#9792ff" };
 
-        RectF{ 0_sch, 0_sch, Scene::Width(), Scene::Height() }.draw(ColorF{ settings_backdrop, 0.55 * m_settingsProgress });
+        RectF( 0_sch, 0_sch, Scene::Width(), Scene::Height() ).draw(ColorF{ settings_backdrop, 0.55 * m_settingsProgress });
         RoundRect{
             center.x - settings_width / 2,
             center.y - settings_height / 2,
@@ -416,13 +416,13 @@ void SongSelectScene::drawImpl() const
             settings_height,
             4_sch * settings_scale
         }.draw(ColorF{ settings_panel, settings_alpha });
-        m_headingFont(U"設定").draw(30_sch * settings_scale, Arg::center(center.x, center.y - 138_sch * settings_scale), Color{ 222, 220, 255, settings_alpha * 255 });
+        m_headingFont(U"設定").draw(30_sch * settings_scale, Arg::center(center.x, center.y - 138_sch * settings_scale), Color( 222, 220, 255, settings_alpha * 255 ));
 
         const double item_top = center.y - 65_sch * settings_scale;
         const double item_offset = 210_sch;
         const double value_y = item_top + 54_sch * settings_scale;
         // rgb(222, 222, 222)
-        const Color description_color{ 222, 222, 222, settings_alpha * 255 };
+        const Color description_color( 222, 222, 222, settings_alpha * 255 );
         const ColorF selected_color{ settings_accent, settings_alpha };
         const bool isNoteSpeedInteger = !Format(data.settings.noteSpeed).includes(U".");
         const std::array<String, 2> item_names{ U"ノーツ速度", U"オフセット" };
@@ -433,7 +433,7 @@ void SongSelectScene::drawImpl() const
             const double item_x = center.x + (-item_offset + item_offset * i) * settings_scale;
             const bool selected = (m_settingsSelection == i);
             // rgb(222, 220, 255)
-            const Color item_color{ 222, 220, 255, settings_alpha * 255 };
+            const Color item_color( 222, 220, 255, settings_alpha * 255 );
             const double value_width = 150_sch * settings_scale;
 
             m_bodyFont(item_names[i]).draw(22_sch * settings_scale, Arg::center(item_x, item_top), item_color);

@@ -92,7 +92,7 @@ void TitleScene::drawImpl() const
         const double alpha = m_creditsProgress;
         const Vec2 center = Scene::CenterF();
 
-        RectF{ 0_sch, 0_sch, Scene::Width(), Scene::Height() }.draw(ColorF{ Color{ U"#000000" }, 0.55 * alpha });
+        RectF( 0_sch, 0_sch, Scene::Width(), Scene::Height() ).draw(ColorF{ Color{ U"#000000" }, 0.55 * alpha });
         RoundRect{
             center.x - window_width / 2,
             center.y - window_height / 2,

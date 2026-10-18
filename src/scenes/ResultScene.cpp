@@ -64,10 +64,10 @@ void ResultScene::drawImpl() const
     double accuracy = data.presentPlayData.accuracy;
 
     long long diff = (long long)score-(long long)m_record_score;
-        Rect{
+    Rect(
         0, Scene::Height() - 25_sch,
         Scene::Width(), 25_sch
-    }.draw(Palette::White);
+    ).draw(Palette::White);
     m_bodyFont(U"①：戻る").draw(12.0_sch, Arg::bottomLeft(Vec2{ 13_sch, Scene::Height() - 4_sch }), Palette::Black);
 
     m_headingFont(U"RESULT").draw(24.0_sch, Vec2{ 26_sch, 15_sch }, Palette::White);

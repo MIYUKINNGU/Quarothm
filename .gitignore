@@ -13,7 +13,11 @@
 /*.dll
 /*.dylib
 /*.exe
+*/Siv3DTest
 /Siv3DTest
+/out
+/AS_DEBUG
+/Intermediate
 
 # IDE and editor files
 /.vscode/
@@ -21,17 +25,21 @@
 /.clangd/
 *.swp
 *~
+*/.vs
+/App/*/.vs
 
 # Local generated game data (keep source assets under assets/ tracked)
 /assets/cache/
 /assets/generated/
 /saves/cache_data.json
 /saves/play_records.json
+/App/saves/cache_data.json
+/App/saves/play_records.json
 
-# Decide how to handle an audio files, a jacket files, and etc later.
-/assets/songs/*/*.wav
-/assets/songs/*/*.ogg
-/assets/songs/*/*.mp3
-/assets/songs/*/*.png
-/assets/songs/*/*.jpg
-/assets/songs/*/*.jpeg
+# Decide how to handle an audio files, a jacket files, and etc later
+App/assets/songs/*/*.wav
+App/assets/songs/*/*.ogg
+App/assets/songs/*/*.mp3
+App/assets/songs/*/*.png
+App/assets/songs/*/*.jpg
+App/assets/songs/*/*.jpeg

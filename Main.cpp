@@ -9,7 +9,7 @@
 
 void Main()
 {
-#ifndef __DEBUG__
+#if __DEBUG__ == 0
     Console << U"Release build";
     Logger.disable();
 #else
@@ -17,8 +17,8 @@ void Main()
 #endif
 
     System::SetTerminationTriggers(UserAction::CloseButtonClicked);
-    Window::SetTitle(U"CHUNILIKE");
-    // Window::SetFullscreen(true);
+    Window::SetTitle(U"Quarothm");
+    Window::SetFullscreen(true);
     Window::SetStyle(WindowStyle::Sizable);
     Scene::SetBackground(Color(U"#080616"));
 

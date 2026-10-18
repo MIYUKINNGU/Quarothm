@@ -29,14 +29,14 @@ struct GameData
 using App = SceneManager<SceneState, GameData>;
 
 inline void DebugLog(const String& message) {
-#ifdef __DEBUG__
+#if __DEBUG__
     Console << message;
 #endif
 }
 
 [[noreturn]]
 inline void ThrowError(const String& message, const String& details = U"") {
-#ifdef __DEBUG__
+#if __DEBUG__
     throw Error{ message + U"\nDetails: " + details };
 #else
     throw Error{ message };
@@ -44,7 +44,7 @@ inline void ThrowError(const String& message, const String& details = U"") {
 }
 
 inline void DebugWarning(const String& message) {
-#ifdef __DEBUG__
+#if __DEBUG__
     Console << U"Warning: " << message;
 #endif
 }
