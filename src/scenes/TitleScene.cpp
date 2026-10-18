@@ -65,20 +65,31 @@ void TitleScene::drawImpl() const
             U"Forest of Clock (NORMAL,EXPERT)",
             U"",
             U"MixingJuice (Twitter: MixingJuice_gen)",
-            U"GOODTEK (NORMAL)"
+            U"GOODTEK (NORMAL)",
             U"",
+            U"yuman",
+            U"GOODTEK (EXPERT)",
+            U"",
+            U"あかさた (Twitter: turn575709)",
+            U"Turkish March (EASY,NORMAL,EXPERT)",
+            U"",
+			U"--- Special Thanks ---",
+            U"あかさた",
+            U"開発者より: 制作に協力していただき",
+            U"　　　　　　　　　ありがとうございまず！",
+			U"",
             U"--- Music ---",
             U"M1LLI0N PP - Camellia",
             U"GOODTEK - EBIMAYO",
             U"Forest of Clock - ARForest",
-            U"Annihilation in F# Minor - tn-shi",
+            U"Calamity Fortune - LeaF",
             U"Turkish March - OtoLogic",
             U"(https://otologic.jp/free/bgm/　　　", // Completely Link: https://otologic.jp/free/bgm/wood_mallet-classic-march01.html
             U"　　　　wood_mallet-classic-march01.html)",
             U"2:23 AM - OpenTracks",
             U"(https://opentracks.com/bgm/detail/13494)",
-            U"ハンガリー舞曲 第5番 - ポケットサウンド",
-            U"(https://pocket-se.info/archives/1615/)"
+            // U"ハンガリー舞曲 第5番 - ポケットサウンド",
+            // U"(https://pocket-se.info/archives/1615/)"
         };
 
         const size_t credit_row_count = (credits.size() + 1) / 2;

@@ -31,32 +31,32 @@
     },
     {
         "id": 3,
-        "title": "Sample3 Song",
-        "artist": "Various Artists",
-        "path": "assets/songs/sample_song",
+        "title": "Forest of Clock",
+        "artist": "ARForest",
+        "path": "assets/songs/Forest_of_Clock",
         "additional_labels": [],
         "chart_creator_easy": "",
-        "chart_creator_normal": "",
-        "chart_creator_expert": ""
+        "chart_creator_normal": "たっくん",
+        "chart_creator_expert": "たっくん"
     },
     {
         "id": 4,
-        "title": "Sample4 Song",
-        "artist": "Various Artists",
-        "path": "assets/songs/sample_song",
+        "title": "GOODTEK",
+        "artist": "EBIMAYO",
+        "path": "assets/songs/GOODTEK",
         "additional_labels": [],
         "chart_creator_easy": "",
-        "chart_creator_normal": "",
-        "chart_creator_expert": ""
+        "chart_creator_normal": "yuman",
+        "chart_creator_expert": "MixingJuice"
     },
     {
         "id": 5,
-        "title": "Sample5 Song",
-        "artist": "Various Artists",
-        "path": "assets/songs/sample_song",
+        "title": "TurkishMarch",
+        "artist": "モーツァルト",
+        "path": "assets/songs/Turkish_March",
         "additional_labels": [],
-        "chart_creator_easy": "",
-        "chart_creator_normal": "",
-        "chart_creator_expert": ""
+        "chart_creator_easy": "あかさた",
+        "chart_creator_normal": "あかさた",
+        "chart_creator_expert": "あかさた"
     }
 ]
