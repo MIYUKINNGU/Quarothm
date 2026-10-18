@@ -13,6 +13,7 @@
 /*.dll
 /*.dylib
 /*.exe
+/App/*.exe
 */Siv3DTest
 /Siv3DTest
 /out
