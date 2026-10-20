@@ -30,6 +30,12 @@ void ResultScene::initialize()
         };
     }
 
+	if (data.presentPlayData.clear != ClearType::NonCleared
+		 && data.presentPlayData.clear != ClearType::None
+		 && !data.cache[U"unlocked_hidden_songs"].contains(0)) {
+		data.cache[U"unlocked_hidden_songs"].push_back(1);
+	}
+
     JSON scoreRecordsJson;
 
     for (auto& [id, data] : data.scoreRecords) {
