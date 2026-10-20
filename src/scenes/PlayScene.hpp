@@ -63,6 +63,7 @@ private:
     double m_loadingVisualProgress = 0.0;
     State m_state = State::Loading;
     double m_elapsedMilliSec = 0.0;
+    bool m_audioStarted = false;
     JudgementType m_recentJudgement = JudgementType::None;
     double m_showJudgeTime = 0;
     const Texture normal_left{ U"assets/images/notes/left_normal.png" };

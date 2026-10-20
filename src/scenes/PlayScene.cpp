@@ -7,7 +7,8 @@
 void PlayScene::initialize()
 {
     m_state = State::Loading;
-    m_elapsedMilliSec = 0.0;
+    m_elapsedMilliSec = -2000.0;
+    m_audioStarted = false;
     m_loadingVisualProgress = 0.0;
 
     const auto& song_data = getData().selectedSong.selectedSongData;
@@ -608,8 +609,8 @@ void PlayScene::beginPlaying()
     data.presentPlayData = ScoreRecorder{};
 
     m_state = State::Playing;
-
-    m_song_audio.play();
+    m_audioStarted = false;
+    m_elapsedMilliSec = -2000.0;
 }
 
 size_t& PlayScene::getCurrentLaneReadingIdx() {
@@ -726,7 +727,21 @@ void PlayScene::updateImpl()
         break;
 
     case State::Playing: {
-        m_elapsedMilliSec = m_song_audio.posSec() * 1000;
+        if (not m_audioStarted)
+        {
+            // Start the chart at -2 seconds and switch to audio at 0 seconds.
+            m_elapsedMilliSec += Scene::DeltaTime() * 1000.0;
+            if (m_elapsedMilliSec >= 0.0)
+            {
+                m_elapsedMilliSec = 0.0;
+                m_song_audio.play();
+                m_audioStarted = true;
+            }
+        }
+        else
+        {
+            m_elapsedMilliSec = m_song_audio.posSec() * 1000.0;
+        }
         m_world.each<TransformComponent>([this, data](const Entity note, TransformComponent& transform)
         {
             NoteComponent* note_component = *m_world.getComponent<NoteComponent*>(note);
@@ -884,7 +899,7 @@ void PlayScene::updateImpl()
         unsigned int notesCount = data.presentPlayData.perfectplus + data.presentPlayData.perfect + data.presentPlayData.good + data.presentPlayData.miss;
         if (notesCount != 0) data.presentPlayData.accuracy = 100.0 * (data.presentPlayData.perfectplus + data.presentPlayData.perfect / 1.25 + data.presentPlayData.good / 3.0) / notesCount;
         else data.presentPlayData.accuracy = 100.0;
-        if (KeyR.down() || !m_song_audio.isPlaying())
+        if (KeyR.down() || (m_audioStarted && !m_song_audio.isPlaying()))
         {
             if (data.presentPlayData.accuracy >= 70.0 && notesCount != 0) {
                 data.presentPlayData.clear = ClearType::Cleared;
