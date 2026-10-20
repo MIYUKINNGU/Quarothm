@@ -998,13 +998,13 @@ void PlayScene::drawImpl() const
             "objects": [ // draw in order from index 0
                 {
                     "type": "text" | "image",
-                    "data": string, // when "type" is "text", it's plain text, and when that's "image", it's relative path to an image data. (based on the game's current directory)
-                    "position_type": "relative" | "absolute", // when this is "relative", use _sch value for position and size.
+                    "data": string, // text is plain text; image is a relative image path, or "//noteType:<NoteType>" for a built-in note.
+                    "position_type": "relative" | "relative-x" | "relative-w" | "relative-xw" | "absolute", // relative uses _sch; relative-x uses _scw for x; relative-w uses _scw for width; relative-xw uses _scw for x and width.
                     "pos": {
                         "x": number,
                         "y": number
                     },
-                    "size": number, // text font size. For images, specify { "width": number, "height": number }.
+                    "size": number, // text font size. For images, specify { "width": number, "height": number } as display size.
                     "anchor_type": "righttop" | "centertop" | "lefttop" | "rightcenter" | "center" | ..., // naming rule: horizontal -> vertical. but "center", not "centercenter"
                     "base_position_type": "righttop" | "centertop" | "lefttop" | "rightcenter" | "center" | ..., // this rule is same as above
                 },
@@ -1069,8 +1069,14 @@ void PlayScene::drawImpl() const
                 const Vec2 base_position = getAnchorPosition(base_position_type);
                 const double x = position_data[U"x"].get<double>();
                 const double y = position_data[U"y"].get<double>();
-                const double position_x = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(x)) : x;
-                const double position_y = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(y)) : y;
+                const double position_x = (position_type == U"relative" || position_type == U"relative-w")
+                    ? static_cast<double>(ResponsiveValue(x))
+                    : (position_type == U"relative-x" || position_type == U"relative-xw")
+                    ? static_cast<double>(ResponsiveValue(x, true))
+                    : x;
+                const double position_y = (position_type == U"relative" || position_type == U"relative-x" || position_type == U"relative-w" || position_type == U"relative-xw")
+                    ? static_cast<double>(ResponsiveValue(y))
+                    : y;
                 const Vec2 position = base_position + Vec2{
                     position_x,
                     position_y
@@ -1080,7 +1086,7 @@ void PlayScene::drawImpl() const
                 if (object_type == U"text")
                 {
                     const double size = object[U"size"].getOr<double>(22.0);
-                    const double font_size = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(size)) : size;
+                    const double font_size = (position_type == U"absolute") ? size : static_cast<double>(ResponsiveValue(size));
                     if (anchor == U"righttop") m_font(object_data).draw(font_size, Arg::topRight(position), text_color);
                     else if (anchor == U"centertop") m_font(object_data).draw(font_size, Arg::topCenter(position), text_color);
                     else if (anchor == U"lefttop") m_font(object_data).draw(font_size, Arg::topLeft(position), text_color);
@@ -1093,6 +1099,88 @@ void PlayScene::drawImpl() const
                 }
                 else if (object_type == U"image")
                 {
+                    if (object_data.starts_with(U"//noteType:"))
+                    {
+                        const String note_type_name = object_data.substr(11);
+                        NoteType note_type = NoteType::None;
+                        if (note_type_name == U"NormalTap") note_type = NoteType::NormalTap;
+                        else if (note_type_name == U"FlickLeft") note_type = NoteType::FlickLeft;
+                        else if (note_type_name == U"FlickRight") note_type = NoteType::FlickRight;
+                        else if (note_type_name == U"FlickUp") note_type = NoteType::FlickUp;
+                        else if (note_type_name == U"FlickDown") note_type = NoteType::FlickDown;
+                        else if (note_type_name == U"Hold") note_type = NoteType::Hold;
+                        else if (note_type_name == U"Drag") note_type = NoteType::Drag;
+                        else if (note_type_name == U"DoubleTap") note_type = NoteType::DoubleTap;
+                        else if (note_type_name == U"TapFlickLeft") note_type = NoteType::TapFlickLeft;
+                        else if (note_type_name == U"TapFlickRight") note_type = NoteType::TapFlickRight;
+                        else if (note_type_name == U"TapFlickUp") note_type = NoteType::TapFlickUp;
+                        else if (note_type_name == U"TapFlickDown") note_type = NoteType::TapFlickDown;
+
+                        const auto& size_data = object[U"size"];
+                        const double note_width = size_data[U"width"].getOr<double>(40.0);
+                        const double note_height = size_data[U"height"].getOr<double>(40.0);
+                        const double display_note_width = (position_type == U"relative-w" || position_type == U"relative-xw") ? static_cast<double>(ResponsiveValue(note_width, true)) : (position_type == U"absolute") ? note_width : static_cast<double>(ResponsiveValue(note_width));
+                        const double display_note_height = (position_type == U"absolute") ? note_height : static_cast<double>(ResponsiveValue(note_height));
+                        const double note_scale = ((display_note_width / 40.0) + (display_note_height / 40.0)) / 2.0;
+
+                        const Texture* note_texture = nullptr;
+                        switch (note_type)
+                        {
+                        case NoteType::FlickLeft:
+                        case NoteType::TapFlickLeft:
+                            note_texture = &normal_left;
+                            break;
+                        case NoteType::FlickRight:
+                        case NoteType::TapFlickRight:
+                            note_texture = &normal_right;
+                            break;
+                        case NoteType::FlickUp:
+                        case NoteType::TapFlickUp:
+                            note_texture = &normal_up;
+                            break;
+                        case NoteType::FlickDown:
+                        case NoteType::TapFlickDown:
+                            note_texture = &normal_down;
+                            break;
+                        default:
+                            break;
+                        }
+
+                        if (note_texture != nullptr)
+                        {
+                            const auto image = note_texture->resized(display_note_width, display_note_height);
+                            if (anchor == U"righttop") image.draw(Arg::topRight(position), text_color);
+                            else if (anchor == U"centertop") image.draw(Arg::topCenter(position), text_color);
+                            else if (anchor == U"lefttop") image.draw(Arg::topLeft(position), text_color);
+                            else if (anchor == U"rightcenter") image.draw(Arg::rightCenter(position), text_color);
+                            else if (anchor == U"leftcenter") image.draw(Arg::leftCenter(position), text_color);
+                            else if (anchor == U"rightbottom") image.draw(Arg::bottomRight(position), text_color);
+                            else if (anchor == U"centerbottom") image.draw(Arg::bottomCenter(position), text_color);
+                            else if (anchor == U"leftbottom") image.draw(Arg::bottomLeft(position), text_color);
+                            else image.draw(Arg::center(position), text_color);
+                        }
+                        else if (note_type == NoteType::NormalTap)
+                        {
+                            Circle{ position, 15_sch * note_scale }.draw(text_color);
+                            Circle{ position, 15_sch * note_scale }.drawFrame(2_sch * note_scale, ColorF{ Palette::Black, text_alpha });
+                        }
+                        else if (note_type == NoteType::DoubleTap)
+                        {
+                            Circle{ position, 15_sch * note_scale }.draw(text_color);
+                            Circle{ position, 15_sch * note_scale }.drawFrame(3_sch * note_scale, ColorF{ Palette::Orange, text_alpha });
+                        }
+                        else if (note_type == NoteType::Drag)
+                        {
+                            Circle{ position, 8_sch * note_scale }.draw(ColorF{ Palette::Yellow, text_alpha });
+                            Circle{ position, 8_sch * note_scale }.drawFrame(1_sch * note_scale, ColorF{ Palette::Cyan, text_alpha });
+                        }
+                        else if (note_type == NoteType::Hold)
+                        {
+                            Circle{ position, 15_sch * note_scale }.draw(ColorF{ Palette::Cyan, text_alpha });
+                        }
+                        continue;
+                    }
+
                     auto image_it = m_textTextures.find(object_data);
                     if (image_it == m_textTextures.end())
                     {
@@ -1103,8 +1191,8 @@ void PlayScene::drawImpl() const
                         const auto& size_data = object[U"size"];
                         const double width = size_data[U"width"].getOr<double>(image_it->second.width());
                         const double height = size_data[U"height"].getOr<double>(image_it->second.height());
-                        const double image_width = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(width, true)) : width;
-                        const double image_height = (position_type == U"relative") ? static_cast<double>(ResponsiveValue(height)) : height;
+                        const double image_width = (position_type == U"relative-w" || position_type == U"relative-xw") ? static_cast<double>(ResponsiveValue(width, true)) : (position_type == U"absolute") ? width : static_cast<double>(ResponsiveValue(width));
+                        const double image_height = (position_type == U"absolute") ? height : static_cast<double>(ResponsiveValue(height));
                         const auto image = image_it->second.resized(image_width, image_height);
                         if (anchor == U"righttop") image.draw(Arg::topRight(position), text_color);
                         else if (anchor == U"centertop") image.draw(Arg::topCenter(position), text_color);

@@ -8,7 +8,7 @@
             {
                 "type": "image",
                 "data": "assets/images/UI/basecolor.png",
-                "position_type": "relative",
+                "position_type": "relative-xw",
                 "pos": {
                     "x": 50,
                     "y": 50
@@ -31,7 +31,7 @@
             {
                 "type": "text",
                 "data": "Quarothmの世界へようこそ！",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 150
@@ -51,7 +51,7 @@
             {
                 "type": "text",
                 "data": "ここではこのゲームの",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 116
@@ -63,7 +63,7 @@
             {
                 "type": "text",
                 "data": "遊び方を説明するよ！",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 183
@@ -83,7 +83,7 @@
             {
                 "type": "text",
                 "data": "まずはタップノーツ",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 100
@@ -93,9 +93,24 @@
                 "base_position_type": "lefttop"
             },
             {
+                "type": "image",
+                "data": "//noteType:NormalTap",
+                "position_type": "relative-x",
+                "pos": {
+                    "x": 100,
+                    "y": 150
+                },
+                "size": {
+                    "width": 15.0,
+                    "height": 15.0
+                },
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
                 "type": "text",
                 "data": "が来たらタイミング良く",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 150
@@ -107,7 +122,7 @@
             {
                 "type": "text",
                 "data": "①や②を押そう！",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 200
@@ -127,7 +142,7 @@
             {
                 "type": "text",
                 "data": "つぎは同時押しノーツ",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 100
@@ -137,9 +152,24 @@
                 "base_position_type": "lefttop"
             },
             {
+                "type": "image",
+                "data": "//noteType:DoubleTap",
+                "position_type": "relative-x",
+                "pos": {
+                    "x": 100,
+                    "y": 150
+                },
+                "size": {
+                    "width": 15.0,
+                    "height": 15.0
+                },
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
                 "type": "text",
                 "data": "が来たらタイミング良く",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 150
@@ -151,7 +181,7 @@
             {
                 "type": "text",
                 "data": "①と②を同時に押そう！",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 200
@@ -171,7 +201,7 @@
             {
                 "type": "text",
                 "data": "今度はフリックノーツ",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 90
@@ -183,7 +213,7 @@
             {
                 "type": "text",
                 "data": "下みたいな矢印が来たら",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 130
@@ -195,7 +225,7 @@
             {
                 "type": "text",
                 "data": "その方向に十字ボタンを押そう！",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 170
@@ -206,8 +236,8 @@
             },
             {
                 "type": "image",
-                "data": "assets/images/notes/left_normal.png",
-                "position_type": "relative",
+                "data": "//noteType:FlickLeft",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 110,
                     "y": 210
@@ -221,8 +251,8 @@
             },
             {
                 "type": "image",
-                "data": "assets/images/notes/up_normal.png",
-                "position_type": "relative",
+                "data": "//noteType:FlickUp",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 170,
                     "y": 210
@@ -236,8 +266,8 @@
             },
             {
                 "type": "image",
-                "data": "assets/images/notes/right_normal.png",
-                "position_type": "relative",
+                "data": "//noteType:FlickRight",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 230,
                     "y": 210
@@ -251,8 +281,8 @@
             },
             {
                 "type": "image",
-                "data": "assets/images/notes/down_normal.png",
-                "position_type": "relative",
+                "data": "//noteType:FlickDown",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 290,
                     "y": 210
@@ -275,7 +305,7 @@
             {
                 "type": "text",
                 "data": "そして、ドラッグノーツ",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 100
@@ -285,9 +315,24 @@
                 "base_position_type": "lefttop"
             },
             {
+                "type": "image",
+                "data": "//noteType:Drag",
+                "position_type": "relative-x",
+                "pos": {
+                    "x": 75,
+                    "y": 150
+                },
+                "size": {
+                    "width": 8.0,
+                    "height": 8.0
+                },
+                "anchor_type": "center",
+                "base_position_type": "lefttop"
+            },
+            {
                 "type": "text",
                 "data": "はタイミングよく押さなくても",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 150
@@ -299,7 +344,7 @@
             {
                 "type": "text",
                 "data": "すでに①か②が押されていればOK！",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 200
@@ -319,7 +364,7 @@
             {
                 "type": "text",
                 "data": "最後はホールドノーツ",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 100
@@ -331,7 +376,7 @@
             {
                 "type": "text",
                 "data": "長いノーツが来ている間は",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 150
@@ -343,7 +388,7 @@
             {
                 "type": "text",
                 "data": "①か②を押しつづけよう！",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 200
@@ -363,7 +408,7 @@
             {
                 "type": "text",
                 "data": "これでチュートリアルは終わり",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 116
@@ -375,7 +420,7 @@
             {
                 "type": "text",
                 "data": "選曲画面で曲を選んで楽しもう！",
-                "position_type": "relative",
+                "position_type": "relative-x",
                 "pos": {
                     "x": 200,
                     "y": 183
