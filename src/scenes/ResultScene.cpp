@@ -3,7 +3,7 @@
 void ResultScene::initialize()
 {
     auto& data = getData();
-    unsigned long long id = data.selectedSong.selectedSongId;
+    unsigned long long id = 3 * data.selectedSong.selectedSongId + static_cast<unsigned long long>(data.selectedSong.selectedDifficulty);
     if (data.scoreRecords.find(id) != data.scoreRecords.end()) {
         m_record_score = data.scoreRecords.at(id).score;
         if (data.scoreRecords.at(id).score < data.presentPlayData.score) {
@@ -32,7 +32,9 @@ void ResultScene::initialize()
 
 	if (data.presentPlayData.clear != ClearType::NonCleared
 		 && data.presentPlayData.clear != ClearType::None
-		 && !data.cache[U"unlocked_hidden_songs"].contains(0)) {
+		 && !data.cache[U"unlocked_hidden_songs"].contains(0)
+		 && data.selectedSong.selectedSongId == 3
+		 && data.selectedSong.selectedDifficulty == Difficulty::Expert) {
 		data.cache[U"unlocked_hidden_songs"].push_back(1);
 	}
 
