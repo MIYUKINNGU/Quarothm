@@ -25,8 +25,8 @@
         "artist": "LeaF",
         "path": "assets/songs/Calamity_Fortune",
         "additional_labels": [],
-        "chart_creator_easy": "",
-        "chart_creator_normal": "",
+        "chart_creator_easy": "MIYUKINNGU",
+        "chart_creator_normal": "あかさた",
         "chart_creator_expert": "asta"
     },
     {
@@ -35,7 +35,7 @@
         "artist": "ARForest",
         "path": "assets/songs/Forest_of_Clock",
         "additional_labels": [],
-        "chart_creator_easy": "",
+        "chart_creator_easy": "MIYUKINNGU",
         "chart_creator_normal": "たっくん",
         "chart_creator_expert": "たっくん"
     },
@@ -45,7 +45,7 @@
         "artist": "EBIMAYO",
         "path": "assets/songs/GOODTEK",
         "additional_labels": [],
-        "chart_creator_easy": "",
+        "chart_creator_easy": "yuman",
         "chart_creator_normal": "yuman",
         "chart_creator_expert": "MixingJuice"
     },
