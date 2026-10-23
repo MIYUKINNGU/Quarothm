@@ -1383,7 +1383,7 @@ void PlayScene::drawImpl() const
         }
     }
 
-    if (Time::GetSec() - m_showJudgeTime < 1.0) {
+    if ((m_recentJudgement != JudgementType::None) && (Scene::Time() - m_showJudgeTime < 1.0)) {
         switch (m_recentJudgement) {
             case JudgementType::PerfectPlus:
                 m_font(U"Perfect+").draw(TextStyle::Outline(0.1_sch, Palette::White), 15_sch * m_renderJudgeSize, Arg::center(center - Vec2(0, 18_sch)), Palette::Pink);
