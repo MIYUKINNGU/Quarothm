@@ -884,6 +884,7 @@ void PlayScene::updateImpl()
                 else if (starting_point_tapped && m_elapsedMilliSec - hold_note->hitTimeMilliSec - hold_note->holdLength - timing_offset > 0.0) {
                     m_recentJudgement = JudgementType::PerfectPlus;
                     processNormalJudged(hold_note, hold_note_idx);
+                    combo++;
                     starting_point_tapped = false;
                 }
             }
