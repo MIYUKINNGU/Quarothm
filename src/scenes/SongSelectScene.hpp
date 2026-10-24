@@ -18,6 +18,7 @@ public:
     void store2Cache();
     void selectRightSideSong();
     void selectLeftSideSong();
+    void updatePreviewAudio();
 
 private:
     const Font m_headingFont{ FontMethod::MSDF, 40, Typeface::Bold };
@@ -34,4 +35,10 @@ private:
     bool m_settingsOpen = false;
     double m_settingsProgress = 0.0;
     int32 m_settingsSelection = 0;
+    Audio m_previewAudio;
+    unsigned long long m_previewSongId = 0;
+    bool m_previewInitialized = false;
+    double m_previewStartSec = 0.0;
+    double m_previewLengthSec = 0.0;
+    double m_previewRestartDelaySec = 0.0;
 };

@@ -29,7 +29,9 @@ void SongSelectScene::initialize()
             additional_labels,
             object.contains(U"chart_creator_easy") ? object[U"chart_creator_easy"].getString() : U"",
             object.contains(U"chart_creator_normal") ? object[U"chart_creator_normal"].getString() : U"",
-            object.contains(U"chart_creator_expert") ? object[U"chart_creator_expert"].getString() : U""
+            object.contains(U"chart_creator_expert") ? object[U"chart_creator_expert"].getString() : U"",
+            object.contains(U"preview_from") ? object[U"preview_from"].get<double>() : 0.0,
+            object.contains(U"preview_to") ? object[U"preview_to"].get<double>() : 0.0
         };
         m_songRegistry[song_id] = song_data;
     }
@@ -105,6 +107,81 @@ void SongSelectScene::initialize()
     }
 
     m_renderIndex = data.selectedSong.selectedSongIndex;
+    updatePreviewAudio();
+}
+
+void SongSelectScene::updatePreviewAudio()
+{
+    const auto& song_data = getData().selectedSong.selectedSongData;
+    if (m_previewInitialized && (m_previewSongId == song_data.id))
+    {
+        if (m_previewLengthSec > 0.0)
+        {
+            if (m_previewRestartDelaySec > 0.0)
+            {
+                m_previewRestartDelaySec = std::max(0.0, m_previewRestartDelaySec - Scene::DeltaTime());
+                if (m_previewRestartDelaySec > 0.0)
+                {
+                    return;
+                }
+                m_previewAudio.seekTime(m_previewStartSec);
+                m_previewAudio.setVolume(1.0).play();
+                return;
+            }
+
+            const double elapsed = m_previewAudio.posSec() - m_previewStartSec;
+            if ((not m_previewAudio.isPlaying()) || (elapsed >= m_previewLengthSec))
+            {
+                m_previewAudio.stop();
+                m_previewRestartDelaySec = 0.1;
+            }
+            else
+            {
+                m_previewAudio.setVolume(Clamp((m_previewLengthSec - elapsed) / 2.0, 0.0, 1.0));
+            }
+        }
+        return;
+    }
+
+    m_previewAudio.stop();
+    m_previewSongId = song_data.id;
+    m_previewInitialized = true;
+    m_previewStartSec = 0.0;
+    m_previewLengthSec = 0.0;
+    m_previewRestartDelaySec = 0.0;
+
+    if (song_data.previewTo <= song_data.previewFrom)
+    {
+        return;
+    }
+
+    TextReader meta_reader{ CombinePath(song_data.songFilePath, U"meta") };
+    String audio_type;
+    if (not meta_reader || not meta_reader.readLine(audio_type))
+    {
+        return;
+    }
+
+    const String audio_path = CombinePath(song_data.songFilePath, U"song." + audio_type);
+    if (not FileSystem::Exists(audio_path))
+    {
+        return;
+    }
+
+    m_previewAudio = Audio{ Audio::Stream, audio_path };
+    if (m_previewAudio.isEmpty())
+    {
+        return;
+    }
+
+    m_previewStartSec = song_data.previewFrom;
+    m_previewLengthSec = song_data.previewTo - song_data.previewFrom;
+    if (m_previewLengthSec <= 0.0)
+    {
+        return;
+    }
+
+    m_previewRestartDelaySec = 0.1;
 }
 
 void SongSelectScene::store2Cache()
@@ -162,6 +239,7 @@ void SongSelectScene::updateImpl()
 {
     const bool settings_was_open = m_settingsOpen;
     updateSettings();
+    updatePreviewAudio();
     if (settings_was_open || m_settingsOpen) return;
 
     updateSongSelect();

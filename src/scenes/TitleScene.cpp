@@ -22,6 +22,15 @@ void TitleScene::updateImpl()
         return;
     }
 
+	if (m_isFullScreen && KeyF11.down()) {
+		m_isFullScreen = false;
+		Window::SetFullscreen(false);
+	}
+	else if (!m_isFullScreen && KeyF11.down()) {
+		m_isFullScreen = true;
+		Window::SetFullscreen(true);
+	}
+
     if (KeyJ.down() | KeyK.down())
     {
         changeScene(SceneState::SongSelect, 0.3s);

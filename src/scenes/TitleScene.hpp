@@ -16,4 +16,5 @@ private:
     const Font m_guideFont{ 22 };
     bool m_creditsOpen = false;
     double m_creditsProgress = 0.0;
+	bool m_isFullScreen = true;
 };
