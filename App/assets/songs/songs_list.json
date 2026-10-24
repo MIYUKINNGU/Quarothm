@@ -4,7 +4,7 @@
         "title": "Tutorial",
         "artist": "",
         "path": "assets/songs/tutorial",
-        "additional_labels": ["use_text", "only_normal"],
+        "additional_labels": ["use_text", "only_easy"],
         "chart_creator_easy": "",
         "chart_creator_normal": "",
         "chart_creator_expert": ""
