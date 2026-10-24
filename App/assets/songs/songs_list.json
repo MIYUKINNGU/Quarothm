@@ -27,7 +27,7 @@
         "additional_labels": [],
         "chart_creator_easy": "MIYUKINNGU",
         "chart_creator_normal": "あかさた",
-        "chart_creator_expert": "asta"
+        "chart_creator_expert": "AdAstra"
     },
     {
         "id": 3,
@@ -58,5 +58,15 @@
         "chart_creator_easy": "あかさた",
         "chart_creator_normal": "あかさた",
         "chart_creator_expert": "あかさた"
+    },
+    {
+        "id": 6,
+        "title": "2:23 AM",
+        "artist": "しゃろう",
+        "path": "assets/songs/223am",
+        "additional_labels": [],
+        "chart_creator_easy": "MIYUKINNGU",
+        "chart_creator_normal": "AL1S",
+        "chart_creator_expert": "AL1S"
     }
 ]
