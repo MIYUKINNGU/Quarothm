@@ -1,10 +1,5 @@
 #include "TitleScene.hpp"
 
-// やることメモ
-// 4. チュートリアル楽曲(ただのメトロノーム)を作成(ラベルにtutorialって入れとく)
-//   - tutorialのときはテキスト表示関係のjsonを追加する
-// 5. 自己べ情報を乗せるか考えて乗せるなら追加する+楽曲タイトルの部分だけ背景色白でちょっとデザイン頑張る
-
 void TitleScene::initialize()
 {
     m_creditsOpen = false;
@@ -60,6 +55,8 @@ void TitleScene::drawImpl() const
             U"--- Charter ---",
             U"MIYUKINNGU",
             U"M1LLI0N PP (EXPERT)",
+            U"Calamity Fortune (EASY)",
+            U"Forest of Clock (EASY)",
             U"",
             U"たっくん",
             U"Forest of Clock (NORMAL,EXPERT)",
@@ -68,15 +65,27 @@ void TitleScene::drawImpl() const
             U"GOODTEK (NORMAL)",
             U"",
             U"yuman",
-            U"GOODTEK (EXPERT)",
+            U"GOODTEK (EASY,EXPERT)",
             U"",
             U"あかさた (Twitter: turn575709)",
             U"Turkish March (EASY,NORMAL,EXPERT)",
+            U"Calamity Fortune (NORMAL)",
+			U"",
+			U"AL1S",
+            U"2:23 AM (NORMAL,EXPERT)",
+			U"",
+			U"AdAstra",
+            U"Calamity Fortune (EXPERT)",
             U"",
 			U"--- Special Thanks ---",
             U"あかさた",
-            U"開発者より: 制作に協力していただき",
+            U"MIYUKINNGUより: 制作にご協力いただき",
             U"　　　　　　　　　ありがとうございまず！",
+			U"",
+			U"その他制作メンバー及び全ての関係者",
+			U"MIYUKINNGUより: 皆様のお力がなければ",
+			U"　　　　　完成させることも難しかった",
+			U"　　　　　　　と思います！感謝申し上げます！",
 			U"",
             U"--- Music ---",
             U"M1LLI0N PP - Camellia",
@@ -87,9 +96,7 @@ void TitleScene::drawImpl() const
             U"(https://otologic.jp/free/bgm/　　　", // Completely Link: https://otologic.jp/free/bgm/wood_mallet-classic-march01.html
             U"　　　　wood_mallet-classic-march01.html)",
             U"2:23 AM - OpenTracks",
-            U"(https://opentracks.com/bgm/detail/13494)",
-            // U"ハンガリー舞曲 第5番 - ポケットサウンド",
-            // U"(https://pocket-se.info/archives/1615/)"
+            U"(https://opentracks.com/bgm/detail/13494)"
         };
 
         const size_t credit_row_count = (credits.size() + 1) / 2;
