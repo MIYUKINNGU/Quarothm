@@ -19,6 +19,8 @@
 /out
 /AS_DEBUG
 /Intermediate
+/*/resources
+/*/engine
 
 # IDE and editor files
 /.vscode/
