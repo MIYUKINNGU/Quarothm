@@ -29,6 +29,7 @@
 *.swp
 *~
 */.vs
+/.vs
 /App/*/.vs
 
 # Local generated game data (keep source assets under assets/ tracked)
