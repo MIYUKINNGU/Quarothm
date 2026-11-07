@@ -35,6 +35,83 @@
 
 音ゲーの実装という美味しい部分は私がいただきました。
 
+## ビルド
+### 手順
+
+WindowsではVisual Studioを用いてビルドを行ってください。
+
+Linuxでは次のコマンドをプロジェクトルートで実行することでビルドできます。
+
+```
+$ cmake -S . -B build -DCMAKE_BUILD_TYPE:STRING=Release
+$ cmake --build build
+```
+
+### コンパイラ
+
+Visual StudioはMSVCのClangを想定しています。
+
+LinuxではGCCを想定しています。
+
+### 注意点
+
+カレントディレクトリ下にassetsフォルダおよびsavesフォルダを必要とします。
+
+また、自前ビルドの場合assetsフォルダにはデフォルトで楽曲の音源データが挿入されていません。
+
+各自で公式サイトからダウンロードするなどしてください。(またその際、拡張子が合っていることをApp/Resource.rcから確認してください)
+
+## プログラム構造
+
+```
+/
+├── src
+│   ├── Common.hpp
+│   ├── ecs
+│   │   ├── EcsWorld.hpp
+│   │   └── RhythmComponents.hpp
+│   ├── scenes
+│   │   ├── InitializeScene.cpp
+│   │   ├── InitializeScene.hpp
+│   │   ├── PlayScene.cpp
+│   │   ├── PlayScene.hpp
+│   │   ├── ResultScene.cpp
+│   │   ├── ResultScene.hpp
+│   │   ├── SongSelectScene.cpp
+│   │   ├── SongSelectScene.hpp
+│   │   ├── TitleScene.cpp
+│   │   └── TitleScene.hpp
+│   ├── types
+│   │   ├── AbstractScene.cpp
+│   │   ├── AbstractScene.hpp
+│   │   ├── ChartData.hpp
+│   │   ├── ClearType.hpp
+│   │   ├── Difficulty.hpp
+│   │   ├── JudgementType.hpp
+│   │   ├── NoteType.hpp
+│   │   ├── ScoreRecorder.hpp
+│   │   ├── SettingsStorage.hpp
+│   │   ├── SongData.hpp
+│   │   ├── SongSelection.hpp
+│   │   └── SongsFolderSpecies.hpp
+│   └── utilities
+│       ├── FilePath.hpp
+│       ├── ResponsiveValue.cpp
+│       └── ResponsiveValue.hpp
+└──Main.cpp
+```
+
+- Main.cpp
+  - プログラムの開始及びループを行っています
+- src/ecs/
+  - ECS設計に基づいて作られたものが配置されています
+- src/scenes/
+  - 画面の遷移に関することや直接ゲームに関係するプログラムがあります
+- src/types/
+  - 基本的な型(メソッドを持たないことが多い)ものが入っています
+- src/utilities/
+  - 直接ゲームに関係するわけじゃない/それ単体で一つのライブラリになりそうな便利なものがあります
+
 ## その他
 
 追記予定(この項目に限らない)
