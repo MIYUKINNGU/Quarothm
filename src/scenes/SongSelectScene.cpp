@@ -6,7 +6,7 @@ void SongSelectScene::initialize()
     m_settingsProgress = 0.0;
     m_settingsSelection = 0;
 
-    const JSON song_list_json = JSON::Load(U"assets/songs/songs_list.json");
+    const JSON song_list_json = JSON::Load(Resource(U"assets/songs/songs_list.json"));
 
 	if (not song_list_json)
 	{
@@ -36,7 +36,7 @@ void SongSelectScene::initialize()
         m_songRegistry[song_id] = song_data;
     }
 
-    const JSON songsFolder_list_json = JSON::Load(U"assets/songs/songsfolder_list.json");
+    const JSON songsFolder_list_json = JSON::Load(Resource(U"assets/songs/songsfolder_list.json"));
 
 	if (not songsFolder_list_json)
 	{
@@ -67,15 +67,14 @@ void SongSelectScene::initialize()
 
     for (const auto& [song_id, song_data] : m_songRegistry)
     {
-        TextReader meta_reader{ CombinePath(song_data.songFilePath, U"meta") };
+        TextReader meta_reader{ Resource(CombinePath(song_data.songFilePath, U"meta")) };
         String audio_extension;
         String jacket_extension;
         if (meta_reader && meta_reader.readLine(audio_extension) && meta_reader.readLine(jacket_extension))
         {
             const String jacket_path = CombinePath(song_data.songFilePath, U"jacket." + jacket_extension);
-            if (FileSystem::Exists(jacket_path))
             {
-                Texture jacket{ jacket_path };
+                Texture jacket{ Resource(jacket_path) };
                 if (not jacket.isEmpty())
                 {
                     m_jacketTextures.emplace(song_id, std::move(jacket));
@@ -155,7 +154,7 @@ void SongSelectScene::updatePreviewAudio()
         return;
     }
 
-    TextReader meta_reader{ CombinePath(song_data.songFilePath, U"meta") };
+    TextReader meta_reader{ Resource(CombinePath(song_data.songFilePath, U"meta")) };
     String audio_type;
     if (not meta_reader || not meta_reader.readLine(audio_type))
     {
@@ -163,12 +162,7 @@ void SongSelectScene::updatePreviewAudio()
     }
 
     const String audio_path = CombinePath(song_data.songFilePath, U"song." + audio_type);
-    if (not FileSystem::Exists(audio_path))
-    {
-        return;
-    }
-
-    m_previewAudio = Audio{ Audio::Stream, audio_path };
+    m_previewAudio = Audio{ Audio::Stream, Resource(audio_path) };
     if (m_previewAudio.isEmpty())
     {
         return;

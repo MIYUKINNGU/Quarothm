@@ -129,6 +129,8 @@ Resource(engine/soundfont/GMGSx.sf2.zstdcmp)
 
 Resource(assets/default_cache_data.json)
 Resource(assets/default_play_records.json)
+Resource(assets/songs/songs_list.json)
+Resource(assets/songs/songsfolder_list.json)
 Resource(assets/images/notes/down_normal.png)
 Resource(assets/images/notes/up_normal.png)
 Resource(assets/images/notes/left_normal.png)

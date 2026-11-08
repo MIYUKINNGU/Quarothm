@@ -24,7 +24,7 @@ void InitializeScene::initialize()
         }
     }
     else {
-        JSON records = JSON::Load(U"assets/default_play_records.json");
+        JSON records = JSON::Load(Resource(U"assets/default_play_records.json"));
         records.save(U"saves/play_records.json");
     }
 
@@ -32,7 +32,7 @@ void InitializeScene::initialize()
         data.cache = JSON::Load(U"saves/cache_data.json");
     }
     else {
-        data.cache = JSON::Load(U"assets/default_cache_data.json");
+        data.cache = JSON::Load(Resource(U"assets/default_cache_data.json"));
         data.cache.save(U"saves/cache_data.json");
     }
 }

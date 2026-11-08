@@ -66,10 +66,10 @@ private:
     bool m_audioStarted = false;
     JudgementType m_recentJudgement = JudgementType::None;
     double m_showJudgeTime = 0;
-    const Texture normal_left{ U"assets/images/notes/left_normal.png" };
-    const Texture normal_right{ U"assets/images/notes/right_normal.png" };
-    const Texture normal_up{ U"assets/images/notes/up_normal.png" };
-    const Texture normal_down{ U"assets/images/notes/down_normal.png" };
+    const Texture normal_left{ Resource(U"assets/images/notes/left_normal.png") };
+    const Texture normal_right{ Resource(U"assets/images/notes/right_normal.png") };
+    const Texture normal_up{ Resource(U"assets/images/notes/up_normal.png") };
+    const Texture normal_down{ Resource(U"assets/images/notes/down_normal.png") };
     const std::unordered_map<int32, double> rot_map = {
         {0, 0.0},
         {1, std::numbers::pi},

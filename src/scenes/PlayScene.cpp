@@ -12,15 +12,14 @@ void PlayScene::initialize()
     m_loadingVisualProgress = 0.0;
 
     const auto& song_data = getData().selectedSong.selectedSongData;
-    TextReader meta_reader{ CombinePath(song_data.songFilePath, U"meta") };
+    TextReader meta_reader{ Resource(CombinePath(song_data.songFilePath, U"meta")) };
     String audio_extension;
     String jacket_extension;
     if (meta_reader && meta_reader.readLine(audio_extension) && meta_reader.readLine(jacket_extension))
     {
         const String jacket_path = CombinePath(song_data.songFilePath, U"jacket." + jacket_extension);
-        if (FileSystem::Exists(jacket_path))
         {
-            Texture jacket{ jacket_path };
+            Texture jacket{ Resource(jacket_path) };
             if (not jacket.isEmpty())
             {
                 m_loadingJacket = std::move(jacket);
@@ -60,7 +59,7 @@ void PlayScene::beginPlaying()
     // ここで譜面・音源などの同期ロード後に必要な初期化を行います。
     String songDir = data.selectedSong.selectedSongData.songFilePath;
 
-    TextReader meta_data{ CombinePath(songDir, U"meta") };
+    TextReader meta_data{ Resource(CombinePath(songDir, U"meta")) };
     if (!meta_data) {
         ThrowError(U"Failed to load.", U"Failed to open `" + CombinePath(songDir, U"meta") + U"`.");
     }
@@ -69,20 +68,17 @@ void PlayScene::beginPlaying()
         ThrowError(U"Failed to load.", U"A meta file is empty.");
     }
 
-    m_song_audio = Audio(CombinePath(songDir, U"song." + audio_type));
+    m_song_audio = Audio(Resource(CombinePath(songDir, U"song." + audio_type)));
     if (m_song_audio.isEmpty()) {
         ThrowError(U"Failed to load.", U"Failed to open `" + CombinePath(songDir, U"song." + audio_type) + U"`.");
     }
 
     if (contains_vector<String>(data.selectedSong.selectedSongData.additionalLabels, U"use_text")) {
         use_text = true;
-        if (!FileSystem::Exists(CombinePath(songDir, U"text_data.json"))) {
-            ThrowError(U"Failed to load.", U"Failed to open `" + CombinePath(songDir, U"text_data.json") + U"`.");
-        }
-        text_json_data = JSON::Load(CombinePath(songDir, U"text_data.json"));
+        text_json_data = JSON::Load(Resource(CombinePath(songDir, U"text_data.json")));
     }
 
-    TextReader chart_reader{ CombinePath(songDir, Format(static_cast<int32>(data.selectedSong.selectedDifficulty)) + U".sus") };
+    TextReader chart_reader{ Resource(CombinePath(songDir, Format(static_cast<int32>(data.selectedSong.selectedDifficulty)) + U".sus")) };
 
     String op;
     std::unordered_map<String, double> bpm_list;
@@ -1200,7 +1196,7 @@ void PlayScene::drawImpl() const
                     auto image_it = m_textTextures.find(object_data);
                     if (image_it == m_textTextures.end())
                     {
-                        image_it = m_textTextures.emplace(object_data, Texture{ object_data }).first;
+                        image_it = m_textTextures.emplace(object_data, Texture{ Resource(object_data) }).first;
                     }
                     if (not image_it->second.isEmpty())
                     {
